@@ -4,7 +4,7 @@
   #include <stdlib.h>
   #include <stdio.h>
   #include <string.h>
-  #include <error.h>
+  //#include <error.h>
 
   #define PUSHI 1
   #define PUSHR	2
@@ -19,7 +19,7 @@
 
   extern FILE* yyin;
 
-  int reg[4]; // 0 - sb; 1 - fp; 2 - ac/in; 3 - sp
+  long reg[4]; // 0 - sb; 1 - fp; 2 - ac/in; 3 - sp
   #define SB reg[0]
   #define FP reg[1]
   #define IN reg[2]
@@ -30,20 +30,20 @@
   #define ST_SIZE 5000 // max stack size
 
   // Increment SP and check
-  #define ISP if (++SP >= ST_SIZE) error(1, 0, "Stack overflow!")
+  #define ISP if (++SP >= ST_SIZE) { printf("Stack overflow!\n"); exit(1);}
 
   // max size of string is 500
 
-  int pc; // program counter during assembly
-  int in[SIZE], op[SIZE], opx[SIZE]; // instructions and their operands
-  int lb[LABELS]; // labels[000..999]
+  long pc; // program counter during assembly
+  long in[SIZE], op[SIZE], opx[SIZE]; // instructions and their operands
+  long lb[LABELS]; // labels[000..999]
 
   char *str;
 %}
 
 
 %union {
-  int i;
+  long i;
   char s[500];
 }
 
@@ -120,14 +120,14 @@ void yyerror(char *s) {
 }
 
 int main(int argc, char *argv[]) {
-  int st[ST_SIZE];
+  long st[ST_SIZE];
 
   SB = 0;
   FP = 0;
   SP = 0;
 
-  int i = 0; // the pc used by the execution
-  int temp;
+  long i = 0; // the pc used by the execution
+  long temp;
 
   char buf[500];
 
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
       case JMP:
 	i = lb[op[i]]; break;
       case GETI:
-	scanf("%d", &st[SP]); i++; ISP; break;
+	scanf("%ld", &st[SP]); i++; ISP; break;
       case GETS:
         scanf("%500[^\n]", buf); str = (char *) malloc(strlen(buf)+1);
 	strcpy(str, buf); st[SP] = (long) str; ISP;
@@ -219,13 +219,13 @@ int main(int argc, char *argv[]) {
       case GETC:
 	st[SP] = getchar(); ISP; i++; break;
       case PUTI:
-	printf("%d\n", st[--SP]); i++; break;
+	printf("%ld\n", st[--SP]); i++; break;
       case PUTS:
 	printf("%s\n", (char *) st[--SP]); i++; break;
       case PUTC:
 	putchar(st[--SP]); putchar('\n'); i++; break;
       case PUTI_:
-	printf("%d", st[--SP]); i++; break;
+	printf("%ld", st[--SP]); i++; break;
       case PUTS_:
 	printf("%s", (char *) st[--SP]); i++; break;
       case PUTC_:
