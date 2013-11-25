@@ -1,0 +1,23 @@
+Nov 26th 2013
+/*我只是吐个槽．．
+  尼玛实现array这话说的多模糊啊摔．．
+  */
+right grammar:
+	a=[5,6,7] //init
+	a[0] //index from zero
+	a[3]=7 //mutable
+wrong grammar:
+	a=[] //empty
+	a=[5,] //trailing comma
+	a=[6,7] //assignment
+	a=["aha","nima"] //string
+	a=[6,"hehe"] //mixed type
+	a=[6,[6,7]] //nested array
+	a[-1] //last elem
+	*a //array has nothing to do with pointer
+	a+3 //same as above
+	print a //output
+Nov 26th 2013
+use 2 spaces to indent
+
+
