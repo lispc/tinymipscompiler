@@ -38,3 +38,15 @@ variable name regex : [a-zA-Z_][a-zA-Z0-9]*
 
 Nov 26th 2013
 他用java命名法！．．．c_style_name vs javaStyleName
+
+Nov 26th 2013
+for 使用和C中相同的scope语义，并且支持{}scope
+
+Nov 26th 2013
+支持a[a[i]]复杂indexing 而不是像VHDL的弱爆array //好像这个不用明说？实现起来也自然？
+
+Nov 26th 2013
+我想把bool和expression 分开..
+
+Nov 26th 2013
+max_array_length=500

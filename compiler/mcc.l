@@ -18,7 +18,7 @@ void yyerror(char *);
                 return INTEGER;
             }
 
-[-()<>=+*/;{}.%] {
+[-\[\]()<>=+*/;{}.%,] {
                 return *yytext;
              }
 
@@ -37,6 +37,7 @@ void yyerror(char *);
 "read"          return READ;
 "&&"            return AND;
 "||"            return OR;
+"Array"         return ARRAY;
 [a-zA-Z_][a-zA-Z0-9]*  { 
                 yylval.vName = strdup(yytext);
                 return VARIABLE;
