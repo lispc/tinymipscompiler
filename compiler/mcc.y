@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#include "calc3.h"
+#include "mcc.h"
 
 
 /* prototypes */
 nodeType *opr(int oper, int nops, ...);
-nodeType *id(int i);
+nodeType *id(char *s);
 nodeType *con(int value);
 void freeNode(nodeType *p);
 int ex(nodeType *p);
@@ -19,12 +19,12 @@ int sym[26];            /* symbol table */
 
 %union {
     int iValue;         /* integer value */
-    char sIndex;        /* symbol table index */
+    char* vName;        /* symbol table index */
     nodeType *nPtr;         /* node pointer */
 };
 
 %token <iValue> INTEGER
-%token <sIndex> VARIABLE
+%token <vName> VARIABLE
 %token FOR WHILE IF PRINT READ DO CONTINUE BREAK
 %nonassoc IFX
 %nonassoc ELSE
@@ -111,7 +111,7 @@ nodeType *con(int value) {
     return p;
 }
 
-nodeType *id(int i) {
+nodeType *id(char* s) {
     nodeType *p;
     size_t nodeSize;
 
@@ -122,7 +122,7 @@ nodeType *id(int i) {
 
     /* copy information */
     p->type = typeId;
-    p->id.i = i;
+    p->id.name = s;
 
     return p;
 }

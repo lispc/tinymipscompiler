@@ -1,16 +1,12 @@
 %{
 #include <stdlib.h>
+#include <string.h>
 #include "mcc.h"
-#include "y.tab.h"
+#include "mcc.tab.h"
 void yyerror(char *);
 %}
 
 %%
-
-[a-z]       { 
-                yylval.sIndex = *yytext - 'a';
-                return VARIABLE;
-            }
 
 0           {
                 yylval.iValue = atoi(yytext);
@@ -41,6 +37,11 @@ void yyerror(char *);
 "read"          return READ;
 "&&"            return AND;
 "||"            return OR;
+[a-zA-Z_][a-zA-Z0-9]*  { 
+                yylval.vName = strdup(yytext);
+                return VARIABLE;
+            }
+
 
 \/\/.*\n        ;  /* skip comments */
 
