@@ -1,5 +1,6 @@
+CC=clang -Wno-write-strings
 mcc: lex.yy.c mcc.tab.c mcc.c
-	gcc -o mcc mcc.c mcc.tab.c lex.yy.c -lfl
+	$(CC) -o mcc mcc.c mcc.tab.c lex.yy.c -lfl
 
 lex.yy.c: mcc.l
 	flex mcc.l

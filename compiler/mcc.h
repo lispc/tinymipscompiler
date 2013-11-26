@@ -1,5 +1,4 @@
 typedef enum { typeCon, typeId, typeOpr, typeArr } nodeEnum;
-struct nodeType;
 /* constants */
 typedef struct {
   int value;          /* value of constant */
@@ -11,13 +10,13 @@ typedef struct {
 } idNodeType;
 
 typedef struct _arrayNode {
-  nodeType* value;
+  struct nodeTypeTag* value;
   struct _arrayNode* next;
 } arrayNode;
 
-typedef struct arrayNodeType {
+typedef struct {
   arrayNode* list_head;
-}
+} arrayNodeType; 
 /* operators */
 typedef struct {
   int oper;           /* operator */

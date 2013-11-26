@@ -41,7 +41,7 @@ int sym[26];      /* symbol table */
 %left '*' '/' '%'
 %nonassoc UMINUS
 
-%type <nPtr> stmt expr stmt_list
+%type <nPtr> stmt expr stmt_list array_literal
 %type <aPtr> elem_list 
 
 %%
@@ -83,7 +83,7 @@ array_literal:
   ;
 
 elem_list:
-    elem_list ',' INTEGER { $$ = cons($3,$1); }
+    elem_list ',' INTEGER { $$ = cons(con($3),$1); }
   |           { $$ = NULL; }
   ;
 
@@ -118,7 +118,7 @@ nodeType *con(int value) {
 
   /* allocate node */
   nodeSize = SIZEOF_NODETYPE + sizeof(conNodeType);
-  if ((p = malloc(nodeSize)) == NULL)
+  if ((p = (nodeType*) malloc(nodeSize)) == NULL)
   yyerror("out of memory");
 
   /* copy information */
@@ -132,7 +132,7 @@ nodeType *array(arrayNode* aPtr) {
   nodeType *p;
   size_t nodeSize;
   nodeSize = SIZEOF_NODETYPE + sizeof(arrayNodeType);
-  if ((p = malloc(nodeSize)) == NULL)
+  if ((p = (nodeType*) malloc(nodeSize)) == NULL)
   yyerror("out of memory");
   p->type = typeArr;
   p->arr.list_head = aPtr;
@@ -140,7 +140,7 @@ nodeType *array(arrayNode* aPtr) {
 }
 
 arrayNode* cons(nodeType* val, arrayNode* xs) {
-  arrayNode* p = malloc(sizeof(arrayNode));
+  arrayNode* p = (arrayNode*) malloc(sizeof(arrayNode));
   p->value = val;
   p->next = xs;
   return p;
@@ -151,7 +151,7 @@ nodeType *id(char* s) {
 
   /* allocate node */
   nodeSize = SIZEOF_NODETYPE + sizeof(idNodeType);
-  if ((p = malloc(nodeSize)) == NULL)
+  if ((p = (nodeType*) malloc(nodeSize)) == NULL)
   yyerror("out of memory");
 
   /* copy information */
@@ -170,7 +170,7 @@ nodeType *opr(int oper, int nops, ...) {
   /* allocate node */
   nodeSize = SIZEOF_NODETYPE + sizeof(oprNodeType) +
   (nops - 1) * sizeof(nodeType*);
-  if ((p = malloc(nodeSize)) == NULL)
+  if ((p = (nodeType*) malloc(nodeSize)) == NULL)
   yyerror("out of memory");
 
   /* copy information */

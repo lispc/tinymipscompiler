@@ -13,7 +13,7 @@ void p_symtb(char* s)
   char** pp = symtb;
   while(*pp)
   { 
-    printf("%d %s\n",pp-symtb,*pp);
+    printf("%ld %s\n",pp-symtb,*pp);
     pp++;
   }
   printf("looking %s\n",s);
