@@ -91,7 +91,7 @@ elem_list:
 
 expr:
     INTEGER       { $$ = con($1); }
-  | VARIABLE '[' expr ']' { $$ = opr('[', 2, $1, $3); }
+  | VARIABLE '[' expr ']' { $$ = opr('[', 2, id($1), $3); }
   | VARIABLE      { $$ = id($1); }
   | '-' expr %prec UMINUS { $$ = opr(UMINUS, 1, $2); }
   | expr '+' expr   { $$ = opr('+', 2, $1, $3); }

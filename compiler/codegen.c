@@ -26,6 +26,7 @@ void p_symtb(char* s)
 }
 int get_pos(char* s)
 {
+  //p_symtb(s);
   int i=0;
   int pos=0;
   while(i<TB_SIZE)
