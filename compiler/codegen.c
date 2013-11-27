@@ -7,54 +7,70 @@
 static int lbl;
 static int lbs,lbe;
 #define TB_SIZE 200
-static char* symtb[TB_SIZE];
+extern arrayNode* append(nodeType*,arrayNode*);
+extern int length(arrayNode*);
+typedef struct {
+  char* name;
+  int size;
+} symtb_entry;
+static symtb_entry symtb[TB_SIZE];
 void p_symtb(char* s)
 {
-  char** pp = symtb;
-  while(*pp)
+  symtb_entry* pp = symtb;
+  while(pp->name)
   { 
-    printf("%ld %s\n",pp-symtb,*pp);
+    printf("%ld %s\n",pp-symtb,pp->name);
     pp++;
   }
   printf("looking %s\n",s);
 }
-int get_index(char* s)
+int get_pos(char* s)
 {
   int i=0;
+  int pos=0;
   while(i<TB_SIZE)
   {
-  if(!symtb[i])
+  if(!symtb[i].name)
   {
     return -1;
   }
-  if(!strcmp(s,symtb[i]))
-    return i;
+  if(!strcmp(s,symtb[i].name))
+    return pos;
   //check null?
-  i++;
+  pos+=symtb[i++].size;
   }
   assert(1==0);
 }
-int insert_to_symtb(char* s)
+int insert_to_symtb(char* name,int size)
 {
-  char** pp = symtb;
-  while(*pp)pp++;
-  *pp = s;
-  return pp-symtb;
+  symtb_entry* pp = symtb;
+  while(pp->name)pp++;
+  pp->name = name;
+  pp->size = size;
+  return get_pos(name);
 }
 int ex(nodeType *p) {
   int templbs=lbs;
   int templbe=lbe;
   int lblx, lbly, lbl1, lbl2;
-  int index;
+  int pos;
   char* name;
+  arrayNode* pp;
   if (!p) return 0;
   switch(p->type) {
   case typeCon:   
   printf("\tpush\t%d\n",p->con.value);
   break;
   case typeId:
-  index = get_index(p->id.name); 
-  printf("\tpush\tsb[%d]\n", index); 
+  pos = get_pos(p->id.name); 
+  printf("\tpush\tsb[%d]\n", pos); 
+  break;
+  case typeArr:
+  pp = p->arr.list_head;
+  while(pp){
+    ex(pp->value);
+    pp = pp->next;
+  }
   break;
   case typeOpr:
   switch(p->opr.oper) {
@@ -74,19 +90,16 @@ int ex(nodeType *p) {
   case DO:
   ex(p->opr.op[0]);
   printf("L%03d:\n", lbl1 = lbl++);
-
-    ex(p->opr.op[1]);
-    printf("\tj0\tL%03d\n", lbl2 = lbl++);
+  ex(p->opr.op[1]);
+  printf("\tj0\tL%03d\n", lbl2 = lbl++);
   lbs=lbl1;
   lbe=lbl2;
   ex(p->opr.op[0]);
   printf("\tjmp\tL%03d\n", lbl1);
   printf("L%03d:\n", lbl2);
-    break;
-
+  break;
   case WHILE:
     printf("L%03d:\n", lbl1 = lbl++);
-
     ex(p->opr.op[0]);
     printf("\tj0\tL%03d\n", lbl2 = lbl++);
     lbs=lbl1;
@@ -119,12 +132,14 @@ int ex(nodeType *p) {
     }
     break;
   case READ:
-  printf("\tread\n");
+    printf("\tread\n");
     name = p->opr.op[0]->id.name;
-    index = get_index(name);
-    if(index==-1)
-      index = insert_to_symtb(name);
-    //printf("\tpop\tsb[%d]\n",index); 
+    pos = get_pos(name);
+    if(pos==-1)
+      insert_to_symtb(name,1);
+    else{
+      printf("\tpop\tsb[%d]\n",pos);
+    } 
   break;
   case PRINT:   
     ex(p->opr.op[0]);
@@ -132,16 +147,27 @@ int ex(nodeType *p) {
     break;
   case '=':
     name = p->opr.op[0]->id.name;
-    index = get_index(name);
-    if(index==-1)
-    { 
-      index = insert_to_symtb(name);
+    pos = get_pos(name);
+    if(p->opr.nops==3){
+      assert(pos!=-1);
+      ex(p->opr.op[2]);
       ex(p->opr.op[1]);
-    }
-    else
-    {
+      printf("\tpush\t%d\n",pos);
+      printf("\tadd\n");
+      printf("\tpop\tin\n");
+      printf("\tpop\tsb[in]\n");
+    }else{
       ex(p->opr.op[1]);
-      printf("\tpop\tsb[%d]\n", index);
+      if(p->opr.op[1]->type==typeArr){
+        assert(pos==-1);
+        insert_to_symtb(name,length(p->opr.op[1]->arr.list_head));
+      }else{
+        if(pos==-1){
+          insert_to_symtb(name,1);
+        }else{
+          printf("\tpop\tsb[%d]\n",pos);
+        }
+      }
     }
     break;
   case UMINUS:  

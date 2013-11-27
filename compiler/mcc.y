@@ -11,6 +11,7 @@ nodeType *id(char *s);
 nodeType *con(int value);
 nodeType *array(arrayNode *);
 arrayNode *cons(nodeType*, arrayNode*);
+arrayNode * append(nodeType*, arrayNode*);
 //nodeType *array();
 void freeNode(nodeType *p);
 int ex(nodeType *p);
@@ -62,6 +63,7 @@ stmt:
   | READ VARIABLE ';'   { $$ = opr(READ, 1, id($2)); }
   | VARIABLE '=' expr ';'    { $$ = opr('=', 2, id($1), $3); }
   | VARIABLE '=' array_literal ';' { $$ = opr('=', 2, id($1), $3); }
+  | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, id($1), $3, $6); }
   | FOR '(' stmt stmt stmt ')' stmt { $$ = opr(FOR, 4, $3, $4,
 $5, $7); }
   | DO stmt WHILE '(' expr ')' ';' { $$ = opr(DO,2,$2,$5);}
@@ -83,7 +85,7 @@ array_literal:
   ;
 
 elem_list:
-    elem_list ',' INTEGER { $$ = cons(con($3),$1); }
+    elem_list ',' INTEGER { $$ = append(con($3),$1); }
   |           { $$ = NULL; }
   ;
 
@@ -144,6 +146,23 @@ arrayNode* cons(nodeType* val, arrayNode* xs) {
   p->value = val;
   p->next = xs;
   return p;
+}
+arrayNode* append(nodeType* val, arrayNode* xs) {
+  arrayNode* p = (arrayNode*) malloc(sizeof(arrayNode));
+  p->value = val;
+  p->next = NULL;
+  if(!xs)
+    return p;
+  while((xs=xs->next));
+  return xs=p;
+}
+int length(arrayNode* xs){
+  int l=0;
+  while(xs){
+    l++;
+    xs = xs->next;
+  }
+  return l;
 }
 nodeType *id(char* s) {
   nodeType *p;
