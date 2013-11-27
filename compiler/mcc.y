@@ -148,13 +148,18 @@ arrayNode* cons(nodeType* val, arrayNode* xs) {
   return p;
 }
 arrayNode* append(nodeType* val, arrayNode* xs) {
-  arrayNode* p = (arrayNode*) malloc(sizeof(arrayNode));
+  arrayNode *p, *p0;
+  p = (arrayNode*) malloc(sizeof(arrayNode));
   p->value = val;
   p->next = NULL;
   if(!xs)
     return p;
-  while((xs=xs->next));
-  return xs=p;
+  p0 = xs;
+  while(p0->next){
+    p0 = p0->next;
+  }
+  p0->next = p;
+  return xs;
 }
 int length(arrayNode* xs){
   int l=0;
@@ -204,6 +209,7 @@ nodeType *opr(int oper, int nops, ...) {
 }
 
 void freeNode(nodeType *p) {
+  /*
   int i;
 
   if (!p) return;
@@ -212,6 +218,7 @@ void freeNode(nodeType *p) {
     freeNode(p->opr.op[i]);
   }
   free (p);
+  */
 }
 
 void yyerror(char *s) {

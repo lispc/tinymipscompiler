@@ -145,7 +145,14 @@ int ex(nodeType *p) {
     ex(p->opr.op[0]);
     printf("\tputi\n");
     break;
-  case 
+  case '[':
+    ex(p->opr.op[1]);
+    pos = get_pos(p->opr.op[0]->id.name);
+    printf("\tpush\t%d\n",pos);
+    printf("\tadd\n");
+    printf("\tpop\tin\n");
+    printf("\tpush\tsb[in]\n");
+    break;
   case '=':
     name = p->opr.op[0]->id.name;
     pos = get_pos(name);
