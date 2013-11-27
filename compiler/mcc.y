@@ -86,7 +86,7 @@ array_literal:
 
 elem_list:
     elem_list ',' INTEGER { $$ = append(con($3),$1); }
-  |           { $$ = NULL; }
+  | INTEGER          { $$ = append(con($1),NULL); }
   ;
 
 expr:
@@ -219,7 +219,8 @@ void yyerror(char *s) {
 }
 
 int main(int argc, char **argv) {
-extern FILE* yyin;
+  extern FILE* yyin;
+  int yydebug=1;
   yyin = fopen(argv[1], "r");
   yyparse();
   return 0;
