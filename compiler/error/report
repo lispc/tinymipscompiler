@@ -1,0 +1,4 @@
+[32mSuccess: array[0m
+[32mSuccess: global_while[0m
+[31mFail: nested_for_loop[0m
+[31mFail: nested_while_loop[0m
