@@ -1,4 +1,4 @@
-typedef enum { typeCon, typeId, typeOpr, typeArr } nodeEnum;
+typedef enum { typeCon, typeId, typeOpr, typeArr/*, typeBlk*/ } nodeEnum;
 /* constants */
 typedef struct {
   int value;          /* value of constant */
@@ -23,7 +23,11 @@ typedef struct {
   int nops;           /* number of operands */
   struct nodeTypeTag *op[1];  /* operands (expandable) */
 } oprNodeType;
-
+/*
+typedef struct {
+  struct nodeTypeTag* list_head;
+} blockNodeType;
+*/
 typedef struct nodeTypeTag {
   nodeEnum type;        /* type of node */
 
@@ -34,6 +38,7 @@ typedef struct nodeTypeTag {
     idNodeType id;      /* identifiers */
     oprNodeType opr;    /* operators */
     arrayNodeType arr;
+    //blockNodeType blk;
   };
 } nodeType;
 

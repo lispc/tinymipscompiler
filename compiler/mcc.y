@@ -42,7 +42,7 @@ int sym[26];      /* symbol table */
 %left '*' '/' '%'
 %nonassoc UMINUS
 
-%type <nPtr> stmt expr stmt_list array_literal
+%type <nPtr> stmt expr stmt_list array_literal block
 %type <aPtr> elem_list 
 
 %%
@@ -72,9 +72,12 @@ $5, $7); }
   | WHILE '(' expr ')' stmt  { $$ = opr(WHILE, 2, $3, $5); }
   | IF '(' expr ')' stmt %prec IFX { $$ = opr(IF, 2, $3, $5); }
   | IF '(' expr ')' stmt ELSE stmt { $$ = opr(IF, 3, $3, $5, $7); }
-  | '{' stmt_list '}'      { $$ = $2; }
+  | block       { $$ = $1; }
   ;
 
+block:
+   '{' stmt_list '}'      { $$ = opr('{', 1, $2); }
+  ;
 stmt_list:
     stmt      { $$ = $1; }
   | stmt_list stmt  { $$ = opr(';', 2, $1, $2); }

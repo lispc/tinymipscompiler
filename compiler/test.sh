@@ -12,7 +12,8 @@ do
   cp $FILE.sample_out ../compiler/error
 done
 cd ../compiler/error
-touch report
+#touch report
+echo "" > report
 for FILE in ${FILES[@]}
 do
   ./mcc $FILE.sc > $FILE.as

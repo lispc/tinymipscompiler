@@ -14,6 +14,13 @@ typedef struct {
   int size;
 } symtb_entry;
 static symtb_entry symtb[TB_SIZE];
+//typedef symtb_entry* Symtb;
+/*
+typedef struct _stb_list {
+  symtb_entry* tb;
+  struct _stb_list* next;
+} stb_list;
+static stb_list* stb_head;*/
 void p_symtb(char* s)
 {
   symtb_entry* pp = symtb;
@@ -24,7 +31,23 @@ void p_symtb(char* s)
   }
   printf("looking %s\n",s);
 }
-int get_pos(char* s)
+/*
+void get_pos(char* s, int* pos, int* global){
+  stb_list* p = stb_head;
+  while(p){
+    int local_pos = get_pos_impl(s, p->tb);
+    if(local_pos!=-1){
+*/      
+    
+int stack_size(){
+  int pos=0;
+  int i=0;
+  while(i<TB_SIZE&&symtb[i].name)
+    pos+=symtb[i++].size;
+  return pos;
+}
+  
+int get_pos(char* s)//,symtb_entry symtb)
 {
   //p_symtb(s);
   int i=0;
@@ -114,6 +137,13 @@ int ex(nodeType *p) {
     break;
   case CONTINUE:
     printf("\tjmp\tL%03d\n", lbs);
+    break;
+  case '{':
+    lbl1 = stack_size();
+    ex(p->opr.op[0]);
+    lbl2 = stack_size()-lbl1;
+    while(lbl2--)
+      printf("\tpop\tin\n");
     break;
   case IF:
     ex(p->opr.op[0]);
