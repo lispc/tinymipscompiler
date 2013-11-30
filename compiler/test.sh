@@ -12,7 +12,6 @@ do
   cp $FILE.sample_out ../compiler/error
 done
 cd ../compiler/error
-#touch report
 echo "" > report
 for FILE in ${FILES[@]}
 do
@@ -20,7 +19,7 @@ do
   ./nas $FILE.as > $FILE.output
   if diff $FILE.output $FILE.sample_out > $FILE.cmp
   then
-    echo -e "\033[32mSuccess: $FILE\033[0m" >> report
+    echo -e "\033[32mSucceed: $FILE\033[0m" >> report
     rm $FILE.sc; rm $FILE.as; rm $FILE.sample_out; rm $FILE.output; rm $FILE.cmp
   else
     echo -e "\033[31mFail: $FILE\033[0m" >> report

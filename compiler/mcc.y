@@ -58,14 +58,13 @@ function:
 
 stmt:
     ';'        { $$ = opr(';', 2, NULL, NULL); }
-  | expr ';'         { $$ = $1; }
+  | expr ';'         { $$ = NULL; }
   | PRINT expr ';'     { $$ = opr(PRINT, 1, $2); }
   | READ VARIABLE ';'   { $$ = opr(READ, 1, id($2)); }
   | VARIABLE '=' expr ';'    { $$ = opr('=', 2, id($1), $3); }
   | VARIABLE '=' array_literal ';' { $$ = opr('=', 2, id($1), $3); }
   | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, id($1), $3, $6); }
-  | FOR '(' stmt stmt stmt ')' stmt { $$ = opr(FOR, 4, $3, $4,
-$5, $7); }
+  | FOR '(' stmt expr ';' stmt ')' stmt { $$ = opr(FOR, 4, $3, $4, $6, $8); }
   | DO stmt WHILE '(' expr ')' ';' { $$ = opr(DO,2,$2,$5);}
   | BREAK ';'         { $$ = opr(BREAK,0);}
   | CONTINUE  ';'       { $$ = opr(CONTINUE,0);}
