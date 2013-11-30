@@ -2,9 +2,9 @@ cd ../test
 FILES=($(ls | cut -d'.' -f1 | uniq))
 cd ../compiler
 mkdir error
-make; mv mcc ./error
-make clean
-cd ../nas; make nas; mv nas ../compiler/error; make clean
+make > /dev/null; mv mcc ./error
+make clean > /dev/null
+cd ../nas; make nas > /dev/null; mv nas ../compiler/error; make clean > /dev/null
 cd ../test
 for FILE in ${FILES[@]}
 do
@@ -12,7 +12,7 @@ do
   cp $FILE.sample_out ../compiler/error
 done
 cd ../compiler/error
-echo "" > report
+echo -n "" > report
 for FILE in ${FILES[@]}
 do
   ./mcc $FILE.sc > $FILE.as
