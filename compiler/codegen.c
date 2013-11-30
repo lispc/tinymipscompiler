@@ -3,7 +3,6 @@
 #include <string.h>
 #include "mcc.h"
 #include "mcc.tab.h"
-
 static int lbl;
 static int lbs,lbe;
 #define TB_SIZE 200
