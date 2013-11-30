@@ -7,7 +7,7 @@
 static int lbl;
 static int lbs,lbe;
 #define TB_SIZE 200
-extern arrayNode* append(oprNodeType*,arrayNode*);
+extern arrayNode* append(Node*,arrayNode*);
 extern int length(arrayNode*);
 typedef struct {
   char* name;
@@ -73,7 +73,7 @@ int insert_to_symtb(char* name,int size)
   pp->size = size;
   return get_pos(name);
 }
-int ex(oprNodeType *p) {
+int ex(Node *p) {
   int templbs=lbs;
   int templbe=lbe;
   int lblx, lbly, lbl1, lbl2;
@@ -237,13 +237,13 @@ int ex(oprNodeType *p) {
 void yyerror(char *s){
   fprintf(stdout, "%s\n", s);
 }
-oprNodeType* uniopr(int type, void* d){
-  oprNodeType *p = (oprNodeType*) malloc(sizeof(oprNodeType));
+Node* uniopr(int type, void* d){
+  Node *p = (Node*) malloc(sizeof(Node));
   p->type = type;
   p->data = d;
   return p;
 }
-arrayNode* append(oprNodeType* val, arrayNode* xs) {
+arrayNode* append(Node* val, arrayNode* xs) {
   arrayNode *p, *p0;
   p = (arrayNode*) malloc(sizeof(arrayNode));
   p->value = val;
@@ -265,21 +265,21 @@ int length(arrayNode* xs){
   }
   return l;
 }
-oprNodeType *opr(int oper, int nops, ...) {
+Node *opr(int oper, int nops, ...) {
   va_list ap;
-  size_t nodeSize = sizeof(oprNodeType) + (nops - 1) * sizeof(oprNodeType*);
-  oprNodeType *p = (oprNodeType*) malloc(nodeSize); 
+  size_t nodeSize = sizeof(Node) + (nops - 1) * sizeof(Node*);
+  Node *p = (Node*) malloc(nodeSize); 
   int i;
   p->type = oper;
   p->nops = nops;
   va_start(ap, nops);
   for (i = 0; i < nops; i++)
-  p->op[i] = va_arg(ap, oprNodeType*);
+  p->op[i] = va_arg(ap, Node*);
   va_end(ap);
   return p;
 }
 
-void freeNode(oprNodeType *p) {
+void freeNode(Node *p) {
   /*
   int i;
 

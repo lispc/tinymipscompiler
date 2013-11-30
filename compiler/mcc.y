@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "mcc.h"
-int ex(oprNodeType *p);
+int ex(Node *p);
 int yylex(void);
 void yyerror(char *s);
 %}
 
 %union {
-  oprNodeType *nPtr;     /* node pointer */
+  Node *nPtr;     /* node pointer */
   arrayNode *aPtr;
 };
 
