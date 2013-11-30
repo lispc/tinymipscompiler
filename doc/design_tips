@@ -1,25 +1,30 @@
 meta:
-	主要就是记录一些需要明确含义的东西．append形式积累，若有矛盾，后面覆盖前面．//当然吐槽约饭也是可以的～~,并且这些东西是可删的．
+    主要就是记录一些需要明确含义的东西．append形式积累，若有矛盾，后面覆盖前面．//当然吐槽约饭也是可以的～~,并且这些东西是可删的．
 
 Nov 26th 2013
 /*我只是吐个槽．．
   尼玛实现array这话说的多模糊啊摔．．
   */
 right grammar:
-	a=[5,6,7] //init
-	a[0] //index from zero
-	a[3]=7 //mutable
+    a[3]=[5,6,7] //init
+    a[3]=[5] //append 0 automatically
+    a[2][2]=[1,2,3,4]
+    a[2][2]=[1,2]
+    a[1][1]
+    a[1][1]=7
+    a[0] //index from zero
+    a[3]=7 //mutable
 wrong grammar:
-	a=[] //empty
-	a=[5,] //trailing comma
-	a=[6,7] //assignment
-	a=["aha","nima"] //string
-	a=[6,"hehe"] //mixed type
-	a=[6,[6,7]] //nested array
-	a[-1] //last elem
-	*a //array has nothing to do with pointer
-	a+3 //same as above
-	print a //output
+    a=[] //empty
+    a=[5,] //trailing comma
+    a=[6,7] //assignment
+    a=["aha","nima"] //string
+    a=[6,"hehe"] //mixed type
+    a=[6,[6,7]] //nested array
+    a[-1] //last elem
+    *a //array has nothing to do with pointer
+    a+3 //same as above
+    print a //output
 
 Nov 26th 2013
 use 2 spaces to indent

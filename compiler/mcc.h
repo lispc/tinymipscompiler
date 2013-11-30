@@ -1,45 +1,21 @@
-typedef enum { typeCon, typeId, typeOpr, typeArr/*, typeBlk*/ } nodeEnum;
-/* constants */
-typedef struct {
-  int value;          /* value of constant */
-} conNodeType;
-
-/* identifiers */
-typedef struct {
-  char* name;            /* subscript to sym array */
-} idNodeType;
-
+#ifndef MCC_HEADER
+#define MCC_HEADER
+#include<stdlib.h>
+typedef enum { typeCon=2000, typeId, typeOpr, typeArr/*, typeBlk*/ } nodeEnum;
 typedef struct _arrayNode {
-  struct nodeTypeTag* value;
+  struct _oprNodeType* value;
   struct _arrayNode* next;
 } arrayNode;
-
-typedef struct {
-  arrayNode* list_head;
-} arrayNodeType; 
-/* operators */
-typedef struct {
-  int oper;           /* operator */
-  int nops;           /* number of operands */
-  struct nodeTypeTag *op[1];  /* operands (expandable) */
+typedef struct _oprNodeType{
+  int type;           /* operator */
+  int nops;  /* number of operands */
+  void* data;
+  struct _oprNodeType *op[1];  /* operands (expandable) */
 } oprNodeType;
-/*
-typedef struct {
-  struct nodeTypeTag* list_head;
-} blockNodeType;
-*/
-typedef struct nodeTypeTag {
-  nodeEnum type;        /* type of node */
-
-  /* union must be last entry in nodeType */
-  /* because operNodeType may dynamically increase */
-  union {
-    conNodeType con;    /* constants */
-    idNodeType id;      /* identifiers */
-    oprNodeType opr;    /* operators */
-    arrayNodeType arr;
-    //blockNodeType blk;
-  };
-} nodeType;
-
-extern int sym[26];
+void freeNode(oprNodeType *p); 
+void yyerror(char *s);
+oprNodeType* uniopr(int type, void* d);
+arrayNode* append(oprNodeType* val, arrayNode* xs); 
+int length(arrayNode* xs);
+oprNodeType *opr(int oper, int nops, ...); 
+#endif

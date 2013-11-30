@@ -4,18 +4,17 @@
 #include <string.h>
 #include "mcc.h"
 #include "mcc.tab.h"
-void yyerror(char *);
 %}
 
 %%
 
 0           {
-                yylval.iValue = atoi(yytext);
+                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
 [1-9][0-9]* {
-                yylval.iValue = atoi(yytext);
+                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
@@ -40,7 +39,7 @@ void yyerror(char *);
 "||"            return OR;
 "Array"         return ARRAY;
 [a-zA-Z_][a-zA-Z0-9]*  { 
-                yylval.vName = strdup(yytext);
+                yylval.nPtr = uniopr(typeId,strdup(yytext));
                 return VARIABLE;
             }
 

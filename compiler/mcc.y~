@@ -3,17 +3,31 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "mcc.h"
-int ex(oprNodeType *p);
+
+
+/* prototypes */
+nodeType *opr(int oper, int nops, ...);
+nodeType *id(char *s);
+nodeType *con(int value);
+nodeType *array(arrayNode *);
+arrayNode *cons(nodeType*, arrayNode*);
+arrayNode * append(nodeType*, arrayNode*);
+//nodeType *array();
+void freeNode(nodeType *p);
+int ex(nodeType *p);
 int yylex(void);
+
 void yyerror(char *s);
+int sym[26];      /* symbol table */
 %}
 
 %union {
-  oprNodeType *nPtr;     /* node pointer */
+  nodeType *nPtr;     /* node pointer */
   arrayNode *aPtr;
 };
 
-%token <nPtr> VARIABLE INTEGER
+%token <iValue> INTEGER
+%token <vName> VARIABLE
 %token FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY
 %nonassoc IFX
 %nonassoc ELSE
@@ -44,11 +58,11 @@ stmt:
     ';'        { $$ = opr(';', 2, NULL, NULL); }
   | expr ';'         { $$ = NULL; }
   | PRINT expr ';'     { $$ = opr(PRINT, 1, $2); }
-  | READ VARIABLE ';'   { $$ = opr(READ, 1, $2); }
-  | VARIABLE '=' expr ';'    { $$ = opr('=', 2, $1, $3); }
-  | VARIABLE /*'[' ']'*/ '=' array_literal ';' { $$ = opr('=', 2, $1, $3); }/*, con($3); }*/
+  | READ VARIABLE ';'   { $$ = opr(READ, 1, id($2)); }
+  | VARIABLE '=' expr ';'    { $$ = opr('=', 2, id($1), $3); }
+  | VARIABLE /*'[' ']'*/ '=' array_literal ';' { $$ = opr('=', 2, id($1), $3); }/*, con($3); }*/
 /*  | VARIABLE '[' INTEGER ']' '[' INTEGER ']' '=' array_literal ';' { $$ = */
-  | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, $1, $3, $6); }
+  | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, id($1), $3, $6); }
   | FOR '(' stmt expr ';' stmt ')' stmt { $$ = opr(FOR, 4, $3, $4, $6, $8); }
   | DO stmt WHILE '(' expr ')' ';' { $$ = opr(DO,2,$2,$5);}
   | BREAK ';'         { $$ = opr(BREAK,0);}
@@ -69,18 +83,18 @@ stmt_list:
   ;
 
 array_literal:
-    '[' elem_list ']' { $$ = uniopr(typeArr,$2);}
+    '[' elem_list ']' { $$ = array($2);}
   ;
 
 elem_list:
-    elem_list ',' INTEGER { $$ = append($3,$1); }
-  | INTEGER          { $$ = append($1,NULL); }
+    elem_list ',' INTEGER { $$ = append(con($3),$1); }
+  | INTEGER          { $$ = append(con($1),NULL); }
   ;
 
 expr:
-    INTEGER     
-  | VARIABLE '[' expr ']' { $$ = opr('[', 2, $1, $3); }
-  | VARIABLE   
+    INTEGER       { $$ = con($1); }
+  | VARIABLE '[' expr ']' { $$ = opr('[', 2, id($1), $3); }
+  | VARIABLE      { $$ = id($1); }
   | '-' expr %prec UMINUS { $$ = opr(UMINUS, 1, $2); }
   | expr '+' expr   { $$ = opr('+', 2, $1, $3); }
   | expr '-' expr   { $$ = opr('-', 2, $1, $3); }
@@ -100,6 +114,9 @@ expr:
 
 %%
 
+void yyerror(char *s) {
+  fprintf(stdout, "%s\n", s);
+}
 
 int main(int argc, char **argv) {
   extern FILE* yyin;

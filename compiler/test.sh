@@ -1,6 +1,5 @@
-cd ../test
-FILES=($(ls | cut -d'.' -f1 | uniq))
-cd ../compiler
+FILES=($(ls ../test| cut -d'.' -f1 | uniq))
+rm -rf error
 mkdir error
 make > /dev/null; mv mcc ./error
 make clean > /dev/null
@@ -12,7 +11,7 @@ do
   cp $FILE.sample_out ../compiler/error
 done
 cd ../compiler/error
-echo -n "" > report
+touch report
 for FILE in ${FILES[@]}
 do
   ./mcc $FILE.sc > $FILE.as
