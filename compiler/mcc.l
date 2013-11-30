@@ -1,4 +1,4 @@
-%option debug
+%option 
 %{
 #include <stdlib.h>
 #include <string.h>
