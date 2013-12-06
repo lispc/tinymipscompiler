@@ -1,34 +1,34 @@
 #include "mcc.h"
 #include "mcc.tab.h"
-static int lbl;
-static int lbs,lbe;
-static vector<pair<string,int>> symtb;
-int adder(const int t,const pair<string,int>& p)
+static long lbl;
+static long lbs,lbe;
+static vector<pair<string,long>> symtb;
+long adder(const long t,const pair<string,long>& p)
 {
   return t+p.second;
 }
-int stack_size(){
+long stack_size(){
   return accumulate(symtb.begin(),symtb.end(),0,adder);
 }
-int get_pos(char* s)
+long get_pos(char* s)
 {
   //show_tb(s);
-  auto i = find_if(begin(symtb),end(symtb),[=](const pair<string,int>& p){return p.first==s;});
+  auto i = find_if(begin(symtb),end(symtb),[=](const pair<string,long>& p){return p.first==s;});
   if(i==symtb.end())
     return -1;
   else 
     return accumulate(symtb.begin(),i,0,adder);
 }
-int insert_to_symtb(char* name,int size)
+long insert_to_symtb(char* name,long size)
 {
   symtb.push_back(make_pair(name,size)); 
   return get_pos(name);
 }
-int ex(Node *p) {
-  int templbs=lbs;
-  int templbe=lbe;
-  int lblx, lbly, lbl1, lbl2;
-  int pos;
+long ex(Node *p) {
+  long templbs=lbs;
+  long templbe=lbe;
+  long lblx, lbly, lbl1, lbl2;
+  long pos;
   char* name;
   if (!p) return 0;
   switch(p->type) {
@@ -129,29 +129,35 @@ int ex(Node *p) {
     printf("\tpush\tsb[in]\n");
     break;
   case '=':
+    ex(p->op[1]);
+    ex(p->op[0]);
+    break;
+  case typeRA:
     name = (char*)p->op[0]->data;
     pos = get_pos(name);
-    if(p->op.size()==3){
-      assert(pos!=-1);
-      ex(p->op[2]);
-      ex(p->op[1]);
-      printf("\tpush\t%d\n",pos);
-      printf("\tadd\n");
-      printf("\tpop\tin\n");
-      printf("\tpop\tsb[in]\n");
+    assert(pos!=-1);
+    ex(p->op[1]);
+    printf("\tpush\t%d\n",pos);
+    printf("\tadd\n");
+    printf("\tpop\tin\n");
+    printf("\tpop\tsb[in]\n");
+    break;
+  case typeRV:
+    name = (char*)p->op[0]->data;
+    pos = get_pos(name);
+    if(pos==-1){
+      insert_to_symtb(name,1);
     }else{
-      ex(p->op[1]);
-      if(p->op[1]->type==typeArr){
-        assert(pos==-1);
-        insert_to_symtb(name,((vector<Node*>*)p->op[1]->data)->size());
-      }else{
-        if(pos==-1){
-          insert_to_symtb(name,1);
-        }else{
-          printf("\tpop\tsb[%d]\n",pos);
-        }
-      }
+      printf("\tpop\tsb[%d]\n",pos);
     }
+    break;
+  case typeDA:
+    name = (char*)p->op[0]->data;
+    assert(get_pos(name)==-1);
+    pos = (long)p->op[1]->data;
+    insert_to_symtb(name,pos);
+    while(pos--)
+      printf("\tpush\t0\n");
     break;
   case UMINUS:  
     ex(p->op[0]);

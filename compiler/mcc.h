@@ -14,8 +14,9 @@
 #include <iostream>
 #include <initializer_list>
 #include <stdlib.h>
+#define YYSTYPE Node*
 using namespace std;
-typedef enum { typeCon=2000, typeId, typeOpr, typeArr} nodeEnum;
+typedef enum { typeCon=2000, typeId, typeOpr, typeArr, typeDA, typeRA, typeRV} nodeEnum;
 class Node{
   public:
   int type;   

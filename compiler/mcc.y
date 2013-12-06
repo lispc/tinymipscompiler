@@ -4,27 +4,15 @@ extern int ex(Node *p);
 extern int yylex();
 extern void yyerror(char*);
 %}
-
-%union {
-  Node *nPtr; 
-  vector<Node*> *aPtr;
-};
-
-%token <nPtr> VARIABLE INTEGER
-%token FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY
+%token VARIABLE INTEGER FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY
 %nonassoc IFX
 %nonassoc ELSE
-
 %left AND OR
-
 %left GE LE EQ NE '>' '<'
 %left ','
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc UMINUS
-
-%type <nPtr> stmt expr stmt_list array_literal
-%type <aPtr> elem_list 
 
 %%
 
@@ -42,9 +30,8 @@ stmt:
   | expr ';'         { $$ = NULL; }
   | PRINT expr ';'     { $$ = new Node(PRINT, {$2}); }
   | READ VARIABLE ';'   { $$ = new Node(READ, {$2}); }
-  | VARIABLE '=' expr ';'    { $$ = new Node('=',{$1, $3}); }
-  | VARIABLE '=' array_literal ';' { $$ = new Node('=', {$1, $3}); }
-  | VARIABLE '[' expr ']' '=' expr ';' { $$ = new Node('=', {$1, $3, $6}); }
+  | ARRAY VARIABLE '[' INTEGER ']' ';' { $$ = new Node(typeDA,{$2,$4}); }
+  | left '=' right ';' { $$ = new Node('=',{$1,$3}); }
   | FOR '(' stmt expr ';' stmt ')' stmt { $$ = new Node(FOR, {$3, $4, $6, $8}); }
   | DO stmt WHILE '(' expr ')' ';' { $$ = new Node(DO,{$2,$5});}
   | BREAK ';'         { $$ = new Node(BREAK,0);}
@@ -55,19 +42,20 @@ stmt:
   | '{' stmt_list '}'      { $$ = new Node('{',{$2}); }
   ;
 
+left:
+    VARIABLE { $$ = new Node(typeRV,{$1}); }
+  | VARIABLE '[' expr ']' { $$ = new Node(typeRA,{$1,$3}); }
+  ;
+
+right:
+    expr
+  ;
+
 stmt_list:
     stmt      { $$ = $1; }
   | stmt_list stmt  { $$ = new Node(';',{$1, $2}); }
   ;
 
-array_literal:
-    '[' elem_list ']' { $$ = new Node(typeArr,$2);}
-  ;
-
-elem_list:
-    elem_list ',' INTEGER { $$->push_back($3); }
-  | INTEGER          { $$ = new vector<Node*>(); $$->push_back($1); }
-  ;
 
 expr:
     INTEGER     

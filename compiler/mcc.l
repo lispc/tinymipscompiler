@@ -8,12 +8,12 @@ extern void yyerror(char*);
 %%
 
 0           {
-                yylval.nPtr = new Node(typeCon,(void*)atol(yytext));
+                yylval = new Node(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
 [1-9][0-9]* {
-                yylval.nPtr = new Node(typeCon,(void*)atol(yytext));
+                yylval = new Node(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
@@ -38,7 +38,7 @@ extern void yyerror(char*);
 "||"            return OR;
 "Array"         return ARRAY;
 [a-zA-Z_][a-zA-Z0-9]*  { 
-                yylval.nPtr = new Node(typeId,strdup(yytext));
+                yylval = new Node(typeId,strdup(yytext));
                 return VARIABLE;
             }
 
