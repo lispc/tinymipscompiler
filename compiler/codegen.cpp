@@ -10,15 +10,6 @@ int adder(const int t,const pair<string,int>& p)
 int stack_size(){
   return accumulate(symtb.begin(),symtb.end(),0,adder);
 }
-/*
-void show_tb(string s)
-{
-  cerr<<"looking for "<<s<<endl;
-  for_each(begin(symtb),end(symtb),[](const pair<string,int>& p){
-    cerr<<p.first<<" "<<p.second<<endl;
-  });
-}
-*/
 int get_pos(char* s)
 {
   //show_tb(s);
@@ -100,7 +91,7 @@ int ex(Node *p) {
     break;
   case IF:
     ex(p->op[0]);
-    if (p->nops > 2) {
+    if (p->op.size() > 2) {
     /* if else */
     printf("\tj0\tL%03d\n", lbl1 = lbl++);
     ex(p->op[1]);
@@ -140,7 +131,7 @@ int ex(Node *p) {
   case '=':
     name = (char*)p->op[0]->data;
     pos = get_pos(name);
-    if(p->nops==3){
+    if(p->op.size()==3){
       assert(pos!=-1);
       ex(p->op[2]);
       ex(p->op[1]);
@@ -189,38 +180,7 @@ int ex(Node *p) {
   lbe=templbe;
   return 0;
 }
-void yyerror(char *s){
-  fprintf(stdout, "%s\n", s);
-}
-Node* uniopr(int type, void* d){
-  Node *p = (Node*) malloc(sizeof(Node));
-  p->type = type;
-  p->data = d;
-  return p;
-}
-Node *opr(int oper, int nops, ...) {
-  va_list ap;
-  size_t nodeSize = sizeof(Node) + (nops - 1) * sizeof(Node*);
-  Node *p = (Node*) malloc(nodeSize); 
-  int i;
-  p->type = oper;
-  p->nops = nops;
-  va_start(ap, nops);
-  for (i = 0; i < nops; i++)
-  p->op[i] = va_arg(ap, Node*);
-  va_end(ap);
-  return p;
-}
-
-void freeNode(Node *p) {
-  /*
-  int i;
-
-  if (!p) return;
-  if (p->type == typeOpr) {
-  for (i = 0; i < p->opr.nops; i++)
-    freeNode(p->opr.op[i]);
-  }
-  free (p);
-  */
+void yyerror(char* s)
+{
+  cerr<<s<<endl;
 }

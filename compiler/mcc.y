@@ -1,12 +1,12 @@
 %{
 #include "mcc.h"
-int ex(Node *p);
-int yylex(void);
-void yyerror(char *s);
+extern int ex(Node *p);
+extern int yylex();
+extern void yyerror(char*);
 %}
 
 %union {
-  Node *nPtr;     /* node pointer */
+  Node *nPtr; 
   vector<Node*> *aPtr;
 };
 
@@ -23,7 +23,7 @@ void yyerror(char *s);
 %left '*' '/' '%'
 %nonassoc UMINUS
 
-%type <nPtr> stmt expr stmt_list array_literal block
+%type <nPtr> stmt expr stmt_list array_literal
 %type <aPtr> elem_list 
 
 %%
@@ -33,40 +33,35 @@ program:
   ;
 
 function:
-    function stmt   { ex($2); freeNode($2); }
+    function stmt   { ex($2); }
   | /* NULL */
   ;
 
 stmt:
-    ';'        { $$ = opr(';', 2, NULL, NULL); }
+    ';'        { $$ = NULL; }
   | expr ';'         { $$ = NULL; }
-  | PRINT expr ';'     { $$ = opr(PRINT, 1, $2); }
-  | READ VARIABLE ';'   { $$ = opr(READ, 1, $2); }
-  | VARIABLE '=' expr ';'    { $$ = opr('=', 2, $1, $3); }
-  | VARIABLE /*'[' ']'*/ '=' array_literal ';' { $$ = opr('=', 2, $1, $3); }/*, con($3); }*/
-/*  | VARIABLE '[' INTEGER ']' '[' INTEGER ']' '=' array_literal ';' { $$ = */
-  | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, $1, $3, $6); }
-  | FOR '(' stmt expr ';' stmt ')' stmt { $$ = opr(FOR, 4, $3, $4, $6, $8); }
-  | DO stmt WHILE '(' expr ')' ';' { $$ = opr(DO,2,$2,$5);}
-  | BREAK ';'         { $$ = opr(BREAK,0);}
-  | CONTINUE  ';'       { $$ = opr(CONTINUE,0);}
-  | WHILE '(' expr ')' stmt  { $$ = opr(WHILE, 2, $3, $5); }
-  | IF '(' expr ')' stmt %prec IFX { $$ = opr(IF, 2, $3, $5); }
-  | IF '(' expr ')' stmt ELSE stmt { $$ = opr(IF, 3, $3, $5, $7); }
-  | block       { $$ = $1; }
+  | PRINT expr ';'     { $$ = new Node(PRINT, {$2}); }
+  | READ VARIABLE ';'   { $$ = new Node(READ, {$2}); }
+  | VARIABLE '=' expr ';'    { $$ = new Node('=',{$1, $3}); }
+  | VARIABLE '=' array_literal ';' { $$ = new Node('=', {$1, $3}); }
+  | VARIABLE '[' expr ']' '=' expr ';' { $$ = new Node('=', {$1, $3, $6}); }
+  | FOR '(' stmt expr ';' stmt ')' stmt { $$ = new Node(FOR, {$3, $4, $6, $8}); }
+  | DO stmt WHILE '(' expr ')' ';' { $$ = new Node(DO,{$2,$5});}
+  | BREAK ';'         { $$ = new Node(BREAK,0);}
+  | CONTINUE  ';'       { $$ = new Node(CONTINUE,0);}
+  | WHILE '(' expr ')' stmt  { $$ = new Node(WHILE, {$3, $5}); }
+  | IF '(' expr ')' stmt %prec IFX { $$ = new Node(IF, {$3, $5}); }
+  | IF '(' expr ')' stmt ELSE stmt { $$ = new Node(IF, {$3, $5, $7}); }
+  | '{' stmt_list '}'      { $$ = new Node('{',{$2}); }
   ;
 
-
-block:
-   '{' stmt_list '}'      { $$ = opr('{', 1, $2); }
-  ;
 stmt_list:
     stmt      { $$ = $1; }
-  | stmt_list stmt  { $$ = opr(';', 2, $1, $2); }
+  | stmt_list stmt  { $$ = new Node(';',{$1, $2}); }
   ;
 
 array_literal:
-    '[' elem_list ']' { $$ = uniopr(typeArr,$2);}
+    '[' elem_list ']' { $$ = new Node(typeArr,$2);}
   ;
 
 elem_list:
@@ -76,22 +71,22 @@ elem_list:
 
 expr:
     INTEGER     
-  | VARIABLE '[' expr ']' { $$ = opr('[', 2, $1, $3); }
+  | VARIABLE '[' expr ']' { $$ = new Node('[', {$1,$3}); }
   | VARIABLE   
-  | '-' expr %prec UMINUS { $$ = opr(UMINUS, 1, $2); }
-  | expr '+' expr   { $$ = opr('+', 2, $1, $3); }
-  | expr '-' expr   { $$ = opr('-', 2, $1, $3); }
-  | expr '*' expr   { $$ = opr('*', 2, $1, $3); }
-  | expr '%' expr   { $$ = opr('%', 2, $1, $3); }
-  | expr '/' expr   { $$ = opr('/', 2, $1, $3); }
-  | expr '<' expr   { $$ = opr('<', 2, $1, $3); }
-  | expr '>' expr   { $$ = opr('>', 2, $1, $3); }
-  | expr GE expr    { $$ = opr(GE, 2, $1, $3); }
-  | expr LE expr    { $$ = opr(LE, 2, $1, $3); }
-  | expr NE expr    { $$ = opr(NE, 2, $1, $3); }
-  | expr EQ expr    { $$ = opr(EQ, 2, $1, $3); }
-  | expr AND expr  { $$ = opr(AND, 2, $1, $3); }
-  | expr OR expr  { $$ = opr(OR, 2, $1, $3); }
+  | '-' expr %prec UMINUS { $$ = new Node(UMINUS,{$2}); }
+  | expr '+' expr   { $$ = new Node('+', {$1,$3}); }
+  | expr '-' expr   { $$ = new Node('-', {$1,$3}); }
+  | expr '*' expr   { $$ = new Node('*', {$1,$3}); }
+  | expr '%' expr   { $$ = new Node('%', {$1,$3}); }
+  | expr '/' expr   { $$ = new Node('/', {$1,$3}); }
+  | expr '<' expr   { $$ = new Node('<', {$1,$3}); }
+  | expr '>' expr   { $$ = new Node('>', {$1,$3}); }
+  | expr GE expr    { $$ = new Node(GE, {$1,$3}); }
+  | expr LE expr    { $$ = new Node(LE, {$1,$3}); }
+  | expr NE expr    { $$ = new Node(NE, {$1,$3}); }
+  | expr EQ expr    { $$ = new Node(EQ, {$1,$3}); }
+  | expr AND expr  { $$ = new Node(AND, {$1,$3}); }
+  | expr OR expr  { $$ = new Node(OR, {$1,$3}); }
   | '(' expr ')'    { $$ = $2; }
   ;
 

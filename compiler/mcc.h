@@ -12,18 +12,17 @@
 #include <numeric>
 #include <utility>
 #include <iostream>
+#include <initializer_list>
 #include <stdlib.h>
 using namespace std;
-typedef enum { typeCon=2000, typeId, typeOpr, typeArr/*, typeBlk*/ } nodeEnum;
-typedef struct _Node{
-  int type;           /* operator */
-  int nops;  /* number of operands */
+typedef enum { typeCon=2000, typeId, typeOpr, typeArr} nodeEnum;
+class Node{
+  public:
+  int type;   
   void* data;
-  struct _Node *op[1];  /* operands (expandable) */
-} Node;
-void freeNode(Node *p); 
-void yyerror(char *s);
-Node* uniopr(int type, void* d);
-Node *opr(int oper, int nops, ...); 
+  vector<Node*> op;
+  Node(int type, initializer_list<Node*> l):type(type),op(l){}
+  Node(int type, void* d):type(type),data(d){}
+};
 #endif
 

@@ -1,20 +1,19 @@
 %option 
 %{
-#include <stdlib.h>
-#include <string.h>
 #include "mcc.h"
 #include "mcc.tab.h"
+extern void yyerror(char*);
 %}
 
 %%
 
 0           {
-                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
+                yylval.nPtr = new Node(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
 [1-9][0-9]* {
-                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
+                yylval.nPtr = new Node(typeCon,(void*)atol(yytext));
                 return INTEGER;
             }
 
@@ -39,7 +38,7 @@
 "||"            return OR;
 "Array"         return ARRAY;
 [a-zA-Z_][a-zA-Z0-9]*  { 
-                yylval.nPtr = uniopr(typeId,strdup(yytext));
+                yylval.nPtr = new Node(typeId,strdup(yytext));
                 return VARIABLE;
             }
 
