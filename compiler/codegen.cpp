@@ -1,76 +1,36 @@
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-#include <stdarg.h>
 #include "mcc.h"
 #include "mcc.tab.h"
 static int lbl;
 static int lbs,lbe;
-#define TB_SIZE 200
-extern arrayNode* append(Node*,arrayNode*);
-extern int length(arrayNode*);
-typedef struct {
-  char* name;
-  int size;
-} symtb_entry;
-static symtb_entry symtb[TB_SIZE];
-//typedef symtb_entry* Symtb;
-/*
-typedef struct _stb_list {
-  symtb_entry* tb;
-  struct _stb_list* next;
-} stb_list;
-static stb_list* stb_head;*/
-void p_symtb(char* s)
+static vector<pair<string,int>> symtb;
+int adder(const int t,const pair<string,int>& p)
 {
-  symtb_entry* pp = symtb;
-  while(pp->name)
-  { 
-    printf("%ld %s\n",pp-symtb,pp->name);
-    pp++;
-  }
-  printf("looking %s\n",s);
+  return t+p.second;
 }
-/*
-void get_pos(char* s, int* pos, int* global){
-  stb_list* p = stb_head;
-  while(p){
-    int local_pos = get_pos_impl(s, p->tb);
-    if(local_pos!=-1){
-*/      
-    
 int stack_size(){
-  int pos=0;
-  int i=0;
-  while(i<TB_SIZE&&symtb[i].name)
-    pos+=symtb[i++].size;
-  return pos;
+  return accumulate(symtb.begin(),symtb.end(),0,adder);
 }
-  
-int get_pos(char* s)//,symtb_entry symtb)
+/*
+void show_tb(string s)
 {
-  //p_symtb(s);
-  int i=0;
-  int pos=0;
-  while(i<TB_SIZE)
-  {
-  if(!symtb[i].name)
-  {
+  cerr<<"looking for "<<s<<endl;
+  for_each(begin(symtb),end(symtb),[](const pair<string,int>& p){
+    cerr<<p.first<<" "<<p.second<<endl;
+  });
+}
+*/
+int get_pos(char* s)
+{
+  //show_tb(s);
+  auto i = find_if(begin(symtb),end(symtb),[=](const pair<string,int>& p){return p.first==s;});
+  if(i==symtb.end())
     return -1;
-  }
-  if(!strcmp(s,symtb[i].name))
-    return pos;
-  //check null?
-  pos+=symtb[i++].size;
-  }
-  assert(1==0);
+  else 
+    return accumulate(symtb.begin(),i,0,adder);
 }
 int insert_to_symtb(char* name,int size)
 {
-  symtb_entry* pp = symtb;
-  while(pp->name)pp++;
-  pp->name = name;
-  pp->size = size;
+  symtb.push_back(make_pair(name,size)); 
   return get_pos(name);
 }
 int ex(Node *p) {
@@ -79,22 +39,17 @@ int ex(Node *p) {
   int lblx, lbly, lbl1, lbl2;
   int pos;
   char* name;
-  arrayNode* pp;
   if (!p) return 0;
   switch(p->type) {
   case typeCon:   
   printf("\tpush\t%ld\n",(long)p->data);
   break;
   case typeId:
-  pos = get_pos(p->data); 
+  pos = get_pos((char*)p->data); 
   printf("\tpush\tsb[%d]\n", pos); 
   break;
   case typeArr:
-  pp = p->data;
-  while(pp){
-    ex(pp->value);
-    pp = pp->next;
-  }
+  for_each(begin(*(vector<Node*>*)p->data),((vector<Node*>*)p->data)->end(),ex);
   break;
   case FOR:
   ex(p->op[0]);
@@ -162,7 +117,7 @@ int ex(Node *p) {
     break;
   case READ:
     printf("\tread\n");
-    name = p->op[0]->data;
+    name = (char*)p->op[0]->data;
     pos = get_pos(name);
     if(pos==-1)
       insert_to_symtb(name,1);
@@ -176,14 +131,14 @@ int ex(Node *p) {
     break;
   case '[':
     ex(p->op[1]);
-    pos = get_pos(p->op[0]->data);
+    pos = get_pos((char*)p->op[0]->data);
     printf("\tpush\t%d\n",pos);
     printf("\tadd\n");
     printf("\tpop\tin\n");
     printf("\tpush\tsb[in]\n");
     break;
   case '=':
-    name = p->op[0]->data;
+    name = (char*)p->op[0]->data;
     pos = get_pos(name);
     if(p->nops==3){
       assert(pos!=-1);
@@ -197,7 +152,7 @@ int ex(Node *p) {
       ex(p->op[1]);
       if(p->op[1]->type==typeArr){
         assert(pos==-1);
-        insert_to_symtb(name,length(p->op[1]->data));
+        insert_to_symtb(name,((vector<Node*>*)p->op[1]->data)->size());
       }else{
         if(pos==-1){
           insert_to_symtb(name,1);
@@ -242,28 +197,6 @@ Node* uniopr(int type, void* d){
   p->type = type;
   p->data = d;
   return p;
-}
-arrayNode* append(Node* val, arrayNode* xs) {
-  arrayNode *p, *p0;
-  p = (arrayNode*) malloc(sizeof(arrayNode));
-  p->value = val;
-  p->next = NULL;
-  if(!xs)
-    return p;
-  p0 = xs;
-  while(p0->next){
-    p0 = p0->next;
-  }
-  p0->next = p;
-  return xs;
-}
-int length(arrayNode* xs){
-  int l=0;
-  while(xs){
-    l++;
-    xs = xs->next;
-  }
-  return l;
 }
 Node *opr(int oper, int nops, ...) {
   va_list ap;

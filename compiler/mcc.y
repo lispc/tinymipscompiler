@@ -1,7 +1,4 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
 #include "mcc.h"
 int ex(Node *p);
 int yylex(void);
@@ -10,7 +7,7 @@ void yyerror(char *s);
 
 %union {
   Node *nPtr;     /* node pointer */
-  arrayNode *aPtr;
+  vector<Node*> *aPtr;
 };
 
 %token <nPtr> VARIABLE INTEGER
@@ -73,8 +70,8 @@ array_literal:
   ;
 
 elem_list:
-    elem_list ',' INTEGER { $$ = append($3,$1); }
-  | INTEGER          { $$ = append($1,NULL); }
+    elem_list ',' INTEGER { $$->push_back($3); }
+  | INTEGER          { $$ = new vector<Node*>(); $$->push_back($1); }
   ;
 
 expr:

@@ -1,11 +1,20 @@
 #ifndef MCC_HEADER
 #define MCC_HEADER
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <assert.h>
+#include <string.h>
+#include <stdarg.h>
+#include <string>
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <utility>
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
 typedef enum { typeCon=2000, typeId, typeOpr, typeArr/*, typeBlk*/ } nodeEnum;
-typedef struct _arrayNode {
-  struct _Node* value;
-  struct _arrayNode* next;
-} arrayNode;
 typedef struct _Node{
   int type;           /* operator */
   int nops;  /* number of operands */
@@ -15,7 +24,6 @@ typedef struct _Node{
 void freeNode(Node *p); 
 void yyerror(char *s);
 Node* uniopr(int type, void* d);
-arrayNode* append(Node* val, arrayNode* xs); 
-int length(arrayNode* xs);
 Node *opr(int oper, int nops, ...); 
 #endif
+
