@@ -1,20 +1,19 @@
-%option 
+%option debug
 %{
-#include <stdlib.h>
-#include <string.h>
 #include "mcc.h"
 #include "mcc.tab.h"
+extern void yyerror(char*);
 %}
 
 %%
 
 0           {
-                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
+                yylval = new Constant((void*)atol(yytext));
                 return INTEGER;
             }
 
 [1-9][0-9]* {
-                yylval.nPtr = uniopr(typeCon,(void*)atol(yytext));
+                yylval = new Constant((void*)atol(yytext));
                 return INTEGER;
             }
 
@@ -30,6 +29,8 @@
 "do"            return DO;
 "break"         return BREAK;
 "continue"      return CONTINUE;
+"def"           return DEF;
+"return"        return RETURN;
 "while"         return WHILE;
 "if"            return IF;
 "else"          return ELSE;
@@ -39,7 +40,7 @@
 "||"            return OR;
 "Array"         return ARRAY;
 [a-zA-Z_][a-zA-Z0-9]*  { 
-                yylval.nPtr = uniopr(typeId,strdup(yytext));
+                yylval = new Identifier(strdup(yytext));
                 return VARIABLE;
             }
 

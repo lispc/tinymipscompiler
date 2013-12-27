@@ -1,33 +1,19 @@
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
 #include "mcc.h"
-int ex(Node *p);
-int yylex(void);
-void yyerror(char *s);
+#include "Node.cpp"
+extern void _ex(Node *p);
+extern int yylex();
+extern void yyerror(char*);
 %}
-
-%union {
-  Node *nPtr;     /* node pointer */
-  arrayNode *aPtr;
-};
-
-%token <nPtr> VARIABLE INTEGER
-%token FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY
+%token VARIABLE INTEGER FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY DEF RETURN
 %nonassoc IFX
 %nonassoc ELSE
-
 %left AND OR
-
 %left GE LE EQ NE '>' '<'
 %left ','
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc UMINUS
-
-%type <nPtr> stmt expr stmt_list array_literal block
-%type <aPtr> elem_list 
 
 %%
 
@@ -36,65 +22,79 @@ program:
   ;
 
 function:
-    function stmt   { ex($2); freeNode($2); }
+    function stmt   { _ex($2); }
+  | function func_declare    { _ex($2); }
   | /* NULL */
   ;
 
+func_declare:
+  DEF VARIABLE '(' param_list ')' '{' stmt_list '}' { $$ = new FuncDecl({$2, $4, $7}); }
+  ;
+
+param_list:
+    VARIABLE  { $$ = new Param({$1});}
+  | param_list ',' VARIABLE  { $$ = new Params({$1,$3});}
+  | /*NULL*/  { $$ = new Param({NULL}); }
+  ;
+
+var_list:
+    expr  { $$ = new Var({$1});  }
+  | var_list ',' expr  { $$ = new Vars({$1,$3});  }
+  | /*NULL*/  { $$ = new Var({NULL});  }
+  ;
+
 stmt:
-    ';'        { $$ = opr(';', 2, NULL, NULL); }
+    ';'        { $$ = NULL; }
   | expr ';'         { $$ = NULL; }
-  | PRINT expr ';'     { $$ = opr(PRINT, 1, $2); }
-  | READ VARIABLE ';'   { $$ = opr(READ, 1, $2); }
-  | VARIABLE '=' expr ';'    { $$ = opr('=', 2, $1, $3); }
-  | VARIABLE /*'[' ']'*/ '=' array_literal ';' { $$ = opr('=', 2, $1, $3); }/*, con($3); }*/
-/*  | VARIABLE '[' INTEGER ']' '[' INTEGER ']' '=' array_literal ';' { $$ = */
-  | VARIABLE '[' expr ']' '=' expr ';' { $$ = opr('=', 3, $1, $3, $6); }
-  | FOR '(' stmt expr ';' stmt ')' stmt { $$ = opr(FOR, 4, $3, $4, $6, $8); }
-  | DO stmt WHILE '(' expr ')' ';' { $$ = opr(DO,2,$2,$5);}
-  | BREAK ';'         { $$ = opr(BREAK,0);}
-  | CONTINUE  ';'       { $$ = opr(CONTINUE,0);}
-  | WHILE '(' expr ')' stmt  { $$ = opr(WHILE, 2, $3, $5); }
-  | IF '(' expr ')' stmt %prec IFX { $$ = opr(IF, 2, $3, $5); }
-  | IF '(' expr ')' stmt ELSE stmt { $$ = opr(IF, 3, $3, $5, $7); }
-  | block       { $$ = $1; }
+  | PRINT expr ';'     { $$ = new Print({$2}); }
+  | READ VARIABLE ';'   { $$ = new Read({$2}); }
+  | ARRAY VARIABLE '[' INTEGER ']' ';' { $$ = new ArrayDecl({$2,$4}); }
+  | left '=' right ';' { $$ = new Assignment({$1,$3}); }
+  | FOR '(' stmt expr ';' stmt ')' stmt { $$ = new For({$3, $4, $6, $8}); }
+  | DO stmt WHILE '(' expr ')' ';' { $$ = new For({$2,$5,$2,NULL});}
+  | BREAK ';'         { $$ = new Break();}
+  | CONTINUE  ';'       { $$ = new Continue();}
+  | RETURN  ';'        { $$ = new Return({NULL});}
+  | RETURN expr ';'  { $$ = new Return({$2}); }
+  | WHILE '(' expr ')' stmt  { $$ = new For({NULL,$3, $5,NULL}); }
+  | IF '(' expr ')' stmt %prec IFX { $$ = new If({$3, $5}); }
+  | IF '(' expr ')' stmt ELSE stmt { $$ = new If({$3, $5, $7}); }
+  | '{' stmt_list '}'      { $$ = new Block({$2}); }
   ;
 
-
-block:
-   '{' stmt_list '}'      { $$ = opr('{', 1, $2); }
+left:
+    VARIABLE { $$ = new Lhs({$1}); }
+  | VARIABLE '[' expr ']' { $$ = new ArrayLhs({$1,$3}); }
   ;
+
+right:
+    expr
+  ;
+
 stmt_list:
     stmt      { $$ = $1; }
-  | stmt_list stmt  { $$ = opr(';', 2, $1, $2); }
-  ;
-
-array_literal:
-    '[' elem_list ']' { $$ = uniopr(typeArr,$2);}
-  ;
-
-elem_list:
-    elem_list ',' INTEGER { $$ = append($3,$1); }
-  | INTEGER          { $$ = append($1,NULL); }
+  | stmt_list stmt  { $$ = new Statements({$1, $2}); }
   ;
 
 expr:
     INTEGER     
-  | VARIABLE '[' expr ']' { $$ = opr('[', 2, $1, $3); }
+  | VARIABLE '[' expr ']' { $$ = new Index({$1,$3}); }
   | VARIABLE   
-  | '-' expr %prec UMINUS { $$ = opr(UMINUS, 1, $2); }
-  | expr '+' expr   { $$ = opr('+', 2, $1, $3); }
-  | expr '-' expr   { $$ = opr('-', 2, $1, $3); }
-  | expr '*' expr   { $$ = opr('*', 2, $1, $3); }
-  | expr '%' expr   { $$ = opr('%', 2, $1, $3); }
-  | expr '/' expr   { $$ = opr('/', 2, $1, $3); }
-  | expr '<' expr   { $$ = opr('<', 2, $1, $3); }
-  | expr '>' expr   { $$ = opr('>', 2, $1, $3); }
-  | expr GE expr    { $$ = opr(GE, 2, $1, $3); }
-  | expr LE expr    { $$ = opr(LE, 2, $1, $3); }
-  | expr NE expr    { $$ = opr(NE, 2, $1, $3); }
-  | expr EQ expr    { $$ = opr(EQ, 2, $1, $3); }
-  | expr AND expr  { $$ = opr(AND, 2, $1, $3); }
-  | expr OR expr  { $$ = opr(OR, 2, $1, $3); }
+  | VARIABLE '(' var_list ')'    { $$ = new FuncCall({$1,$3});  }
+  | '-' expr %prec UMINUS { $$ = new Uminus({$2}); }
+  | expr '+' expr   { $$ = new Add({$1,$3}); }
+  | expr '-' expr   { $$ = new Sub({$1,$3}); }
+  | expr '*' expr   { $$ = new Mul({$1,$3}); }
+  | expr '%' expr   { $$ = new Mod({$1,$3}); }
+  | expr '/' expr   { $$ = new Div({$1,$3}); }
+  | expr '<' expr   { $$ = new CompLT({$1,$3}); }
+  | expr '>' expr   { $$ = new CompGT({$1,$3}); }
+  | expr GE expr    { $$ = new CompGE({$1,$3}); }
+  | expr LE expr    { $$ = new CompLE({$1,$3}); }
+  | expr NE expr    { $$ = new CompNE({$1,$3}); }
+  | expr EQ expr    { $$ = new CompEQ({$1,$3}); }
+  | expr AND expr  { $$ = new And({$1,$3}); }
+  | expr OR expr  { $$ = new Or({$1,$3}); }
   | '(' expr ')'    { $$ = $2; }
   ;
 
