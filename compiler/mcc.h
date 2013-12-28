@@ -94,56 +94,9 @@ struct Statements:Node{
   using Node::Node;
   void ex();
 };
-struct Add:Node{
-  using Node::Node;
-  void ex();
-};
-struct Sub:Node{
-  using Node::Node;
-  void ex();
-};
-struct Mul:Node{
-  using Node::Node;
-  void ex();
-};
-struct Div:Node{
-  using Node::Node;
-  void ex();
-};
-struct Mod:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompLT:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompGT:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompNE:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompGE:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompLE:Node{
-  using Node::Node;
-  void ex();
-};
-struct CompEQ:Node{
-  using Node::Node;
-  void ex();
-};
-struct And:Node{
-  using Node::Node;
-  void ex();
-};
-struct Or:Node{
-  using Node::Node;
+struct Bi_op:Node{
+  string opname;
+  Bi_op(string s,initializer_list<Node*> l):opname(s),Node(l){}
   void ex();
 };
 #endif

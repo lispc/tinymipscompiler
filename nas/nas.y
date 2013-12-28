@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
       case GETI:
 	scanf("%ld", &st[SP]); i++; ISP; break;
       case GETS:
-        scanf("%500[^\n]", buf); str = (char *) malloc(strlen(buf)+1);
+  scanf("%500[^\n]", buf);getchar(); str = (char *) malloc(strlen(buf)+1);
 	strcpy(str, buf); st[SP] = (long) str; ISP;
 	i++;
 	break;

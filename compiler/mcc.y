@@ -1,6 +1,5 @@
 %{
 #include "mcc.h"
-#include "Node.cpp"
 extern void _ex(Node *p);
 extern int yylex();
 extern void yyerror(char*);
@@ -63,19 +62,19 @@ expr:
   | VARIABLE '[' expr ']' { $$ = new Index({$1,$3}); }
   | VARIABLE   
   | '-' expr %prec UMINUS { $$ = new Uminus({$2}); }
-  | expr '+' expr   { $$ = new Add({$1,$3}); }
-  | expr '-' expr   { $$ = new Sub({$1,$3}); }
-  | expr '*' expr   { $$ = new Mul({$1,$3}); }
-  | expr '%' expr   { $$ = new Mod({$1,$3}); }
-  | expr '/' expr   { $$ = new Div({$1,$3}); }
-  | expr '<' expr   { $$ = new CompLT({$1,$3}); }
-  | expr '>' expr   { $$ = new CompGT({$1,$3}); }
-  | expr GE expr    { $$ = new CompGE({$1,$3}); }
-  | expr LE expr    { $$ = new CompLE({$1,$3}); }
-  | expr NE expr    { $$ = new CompNE({$1,$3}); }
-  | expr EQ expr    { $$ = new CompEQ({$1,$3}); }
-  | expr AND expr  { $$ = new And({$1,$3}); }
-  | expr OR expr  { $$ = new Or({$1,$3}); }
+  | expr '+' expr   { $$ = new Bi_op("add",{$1,$3}); }
+  | expr '-' expr   { $$ = new Bi_op("sub",{$1,$3}); }
+  | expr '*' expr   { $$ = new Bi_op("mul",{$1,$3}); }
+  | expr '%' expr   { $$ = new Bi_op("mod",{$1,$3}); }
+  | expr '/' expr   { $$ = new Bi_op("div",{$1,$3}); }
+  | expr '<' expr   { $$ = new Bi_op("compLT",{$1,$3}); }
+  | expr '>' expr   { $$ = new Bi_op("compGT",{$1,$3}); }
+  | expr GE expr    { $$ = new Bi_op("compGE",{$1,$3}); }
+  | expr LE expr    { $$ = new Bi_op("compLE",{$1,$3}); }
+  | expr NE expr    { $$ = new Bi_op("compNE",{$1,$3}); }
+  | expr EQ expr    { $$ = new Bi_op("compEQ",{$1,$3}); }
+  | expr AND expr  { $$ = new Bi_op("and",{$1,$3}); }
+  | expr OR expr  { $$ = new Bi_op("or",{$1,$3}); }
   | '(' expr ')'    { $$ = $2; }
   ;
 

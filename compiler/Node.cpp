@@ -141,44 +141,10 @@ void Statements::ex(){
     op[0]->ex();
     op[1]->ex();
 }
-void Add::ex(){
-  Node::ex();
-}
-void Sub::ex(){
-  Node::ex();
-}
-void Mul::ex(){
-  Node::ex();
-}
-void Div::ex(){
-  Node::ex();
-}
-void Mod::ex(){
-  Node::ex();
-}
-void CompLT::ex(){
-  Node::ex();
-}
-void CompGT::ex(){
-  Node::ex();
-}
-void CompNE::ex(){
-  Node::ex();
-}
-void CompGE::ex(){
-  Node::ex();
-}
-void CompLE::ex(){
-  Node::ex();
-}
-void CompEQ::ex(){
-  Node::ex();
-}
-void And::ex(){
-  Node::ex();
-}
-void Or::ex(){
-  Node::ex();
+void Bi_op::ex(){
+    op[0]->ex();
+    op[1]->ex();
+    printf("\t%s\n",opname.c_str());
 }
 void yyerror(char* s)
 {
