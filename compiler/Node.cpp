@@ -77,10 +77,13 @@ void _ex(Node *p) {
 void Node::ex(){
   _ex(op[0]);
   _ex(op[1]);
-  auto t1 = op[1]->ret;
-  auto t2 = op[2]->ret;
-  if(t1!=t2)
-    cerr<<"binary operator with different types"<<endl;
+  assert(op[0]);
+  assert(op[1]);
+  if(idebug)printf("//binary oprands on stack\n");
+  auto t1 = op[0]->ret;
+  auto t2 = op[1]->ret;
+  if(idebug)printf("//t1:%d t2:%d\n",t1,t2);
+  assert(t1==t2 && "binary operator with different types");
   ret = t1;
   printf("\t%s\n",typeid(*this).name()+1);
 }
@@ -95,6 +98,7 @@ void Chr::ex(){
 }
 void Identifier::ex(){
   lctn* l = location((char*)data);
+  ret = l->vtype;
   printf("\tpush\t%s[%d]\n", l->type, l->num); 
 }
   
@@ -128,7 +132,7 @@ void Block::ex(){
     _ex(op[0]);
     pop_stack(frame_size());
     tb_list.pop_back();
-    if(idebug)cout<<"end block"<<endl;
+    if(idebug)cout<<"//end block"<<endl;
 }
 void If::ex(){
     int lb1,lb2;
@@ -149,10 +153,7 @@ void If::ex(){
 void Read::ex(){
     auto name = (char*)op[0]->data;
     lctn *l = location(name);
-    if(l==NULL)
-      cerr<<"input undeclared variable!"<<endl;
-      //insert_to_tb(name,1,tb_list.back().tb);
-    else{
+    assert(l && "input undeclared variable!");
       switch(l->vtype){
         case TINT:
           printf("\tgeti\n");
@@ -162,11 +163,12 @@ void Read::ex(){
           break;
         case TSTR:
           printf("\tgets\n");
+          break;
         default:
           cerr<<"invalid type"<<endl;
-      }
+          exit(-1);
+	  }
       printf("\tpop\t%s[%d]\n",l->type,l->num);
-    } 
 }
 void Print::ex(){
     _ex(op[0]);
@@ -182,6 +184,7 @@ void Print::ex(){
         break;
       default:
         cerr<<"invalid type"<<endl;
+        exit(-1);
     }
 }
 void Index::ex(){
@@ -209,28 +212,23 @@ void ArrayLhs::ex(){
 void Lhs::ex(){
     auto name = (char*)op[0]->data;
     lctn *l = location(name);
-    if(l==NULL){
-      cerr<<"assign value to undeclared variable"<<endl;
-      //insert_to_tb(name,1,tb_list.back().tb);
-    }else{
-      printf("\tpop\t%s[%d]\n",l->type,l->num);
-    }
+    assert(l && "assign value to undeclared variable");
+    printf("\tpop\t%s[%d]\n",l->type,l->num);
 }
 void ArrayDecl::ex(){
     auto type = ((Type*)op[0])->d;
     auto name = (char*)op[1]->data;
-    if(loc(name,tb_list.back().tb)!=-1)
-      cerr<<"The variable has been declared already in the same scope!"<<endl;
+    assert(loc(name,tb_list.back().tb)==-1 && "The variable has been declared already in the same scope!");
     auto size = (long)op[2]->data;
     insert_to_tb(name,type,size,tb_list.back().tb);
+	printf("//pushing %d 0s\n",size);
     while(size--)
       printf("\tpush\t0\n");
 }
 void Decl::ex(){
 	auto type = ((Type*)op[0])->d;
 	auto name = (char*)op[1]->data;
-    if(loc(name,tb_list.back().tb)!=-1)
-      cerr<<"The variable has been declared already in the same scope!"<<endl;
+    assert(loc(name,tb_list.back().tb)==-1 && "The variable has been declared already in the same scope!");
     insert_to_tb(name,type,1,tb_list.back().tb);
     printf("\tpush\t0\n");
 }

@@ -1,7 +1,7 @@
-i=1;
+int i=1;
 while(i<6){
   print i;
-  j=1;
+  int j=1;
   while(j<i){
   print j;
   j=j+1;

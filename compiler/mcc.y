@@ -1,6 +1,7 @@
 %{
 #include "mcc.h"
 #include "Node.cpp"
+#include <cstdio>
 extern void _ex(Node *p);
 extern int yylex();
 extern void yyerror(char*);
@@ -46,7 +47,7 @@ var_list:
 stmt:
     ';'        { $$ = NULL; }
   | TYPE VARIABLE ';'  { $$ = new Decl({$1,$2}); }
-  | TYPE VARIABLE '=' expr ';' { Node* t1 = new Decl({$1,$2}); Node* t2 = new Assignment({$2,$4}); $$ = new Statements({t1,t2}); }
+  | TYPE VARIABLE '=' expr ';' { Node* t1 = new Decl({$1,$2}); Node* t2 = new Assignment({(new Lhs({$2})),$4}); $$ = new Statements({t1,t2}); }
   | expr ';'         { $$ = new Block({$1}); }
   | PRINT expr ';'     { $$ = new Print({$2}); }
   | READ VARIABLE ';'   { $$ = new Read({$2}); }
@@ -109,6 +110,8 @@ int main(int argc, char **argv) {
   extern FILE* yyin;
   int yydebug=1;
   yyin = fopen(argv[1], "r");
+  setbuf(stdout,NULL);
+  setbuf(stderr,NULL);
   Node::tb_list.push_back(symtb(0,"sb"));
   yyparse();
   return 0;

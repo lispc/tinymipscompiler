@@ -1,5 +1,5 @@
-i=1;
-j=0;
+int i=1;
+int j=0;
 while(i<6){
   print i;
   j=1;

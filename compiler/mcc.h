@@ -68,7 +68,7 @@ struct Node{
 };
 void _ex(Node*);
 struct Constant:Node{
-  Constant(int i):Node((void*)NULL,TINT),d(i){}
+  Constant(int i):Node((void*)i,TINT),d(i){}
   int d;
   void ex();
 };

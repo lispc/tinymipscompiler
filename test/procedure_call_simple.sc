@@ -1,17 +1,17 @@
-z = 10000;
-def max(x,y)
+int z = 10000;
+def max(int x,int y)
 {
-  l = x;
-  m = y;
+  int l = x;
+  int m = y;
   if(l>=m)  return x;
   else      return y;
-  x = 1000;
-  y = 2000;
+  //int x = 1000;
+  //int y = 2000;what are u doing iris..
 }
 
-a = 3;
-b = 5;
-c = 10;
+int a = 3;
+int b = 5;
+int c = 10;
 print max(a,b);
 
 a = 2*a;
