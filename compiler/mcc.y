@@ -5,7 +5,7 @@ extern void _ex(Node *p);
 extern int yylex();
 extern void yyerror(char*);
 %}
-%token VARIABLE INTEGER FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY DEF RETURN
+%token VARIABLE INTEGER CHR STR FOR WHILE IF PRINT READ DO CONTINUE BREAK ARRAY DEF RETURN TYPE 
 %nonassoc IFX
 %nonassoc ELSE
 %left AND OR
@@ -32,8 +32,8 @@ func_declare:
   ;
 
 param_list:
-    VARIABLE  { $$ = new Param({$1});}
-  | param_list ',' VARIABLE  { $$ = new Params({$1,$3});}
+    TYPE VARIABLE  { $$ = new Param({$1,$2});}
+  | param_list ',' TYPE VARIABLE  { $$ = new Params({$1,$3,$4});}
   | /*NULL*/  { $$ = new Param({NULL}); }
   ;
 
@@ -45,10 +45,12 @@ var_list:
 
 stmt:
     ';'        { $$ = NULL; }
-  | expr ';'         { $$ = NULL; }
+  | TYPE VARIABLE ';'  { $$ = new Decl({$1,$2}); }
+  | TYPE VARIABLE '=' expr ';' { Node* t1 = new Decl({$1,$2}); Node* t2 = new Assignment({$2,$4}); $$ = new Statements({t1,t2}); }
+  | expr ';'         { $$ = new Block({$1}); }
   | PRINT expr ';'     { $$ = new Print({$2}); }
   | READ VARIABLE ';'   { $$ = new Read({$2}); }
-  | ARRAY VARIABLE '[' INTEGER ']' ';' { $$ = new ArrayDecl({$2,$4}); }
+  | TYPE VARIABLE '[' INTEGER ']' ';' { $$ = new ArrayDecl({$1,$2,$4}); }
   | left '=' right ';' { $$ = new Assignment({$1,$3}); }
   | FOR '(' stmt expr ';' stmt ')' stmt { $$ = new For({$3, $4, $6, $8}); }
   | DO stmt WHILE '(' expr ')' ';' { $$ = new For({$2,$5,$2,NULL});}
@@ -77,7 +79,9 @@ stmt_list:
   ;
 
 expr:
-    INTEGER     
+    INTEGER    
+  | CHR
+  | STR 
   | VARIABLE '[' expr ']' { $$ = new Index({$1,$3}); }
   | VARIABLE   
   | VARIABLE '(' var_list ')'    { $$ = new FuncCall({$1,$3});  }
@@ -105,6 +109,7 @@ int main(int argc, char **argv) {
   extern FILE* yyin;
   int yydebug=1;
   yyin = fopen(argv[1], "r");
+  Node::tb_list.push_back(symtb(0,"sb"));
   yyparse();
   return 0;
 }

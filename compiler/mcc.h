@@ -1,6 +1,7 @@
 #ifndef MCC_HEADER
 #define MCC_HEADER
 #include <stdio.h>
+#include <tuple>
 #include <stdarg.h>
 #include <assert.h>
 #include <string.h>
@@ -15,16 +16,19 @@
 #include <initializer_list>
 #include <stdlib.h>
 #include <typeinfo>
+#include <iostream>
 #define YYSTYPE Node*
 using namespace std;
+enum _Typename {TINT,TCHR,TSTR,TVOID,TWRONG};
 struct lctn{
   long num;
-  char* type;  
+  char* type; 
+  _Typename vtype; 
 };
 struct symtb{
   long start_pos;
   char* type;
-  vector<pair<string,long>> tb;
+  vector<tuple<string,_Typename,long>> tb;
   symtb() {}
   symtb(long sp, char* t){
     start_pos = sp;
@@ -44,24 +48,37 @@ struct func{
 };
 struct Node{  
   void* data;
+  _Typename ret;
   vector<Node*> op;
   Node(){}
   Node(initializer_list<Node*> l):op(l){}
   Node(void* d):data(d){}
+  Node(void* d,_Typename t):data(d),ret(t){}
   virtual void ex();
   static long lbs,lbe,lbl;
   static vector<symtb> tb_list;
   static vector<func> functb;
   lctn* location(char*);
   long stack_size();
-  long loc(char*,vector<pair<string,long>>&);
-  void insert_to_tb(char*,long,vector<pair<string,long>>&);
+  long frame_size();
+  long loc(char*,vector<tuple<string,_Typename,long>>&);
+  void insert_to_tb(char*,_Typename,long,vector<tuple<string,_Typename,long>>&);
   func func_loc(char*);
   void insert_to_frtb(char*,char*,long,vector<func>&);
 };
 void _ex(Node*);
 struct Constant:Node{
-  using Node::Node;
+  Constant(int i):Node((void*)NULL,TINT),d(i){}
+  int d;
+  void ex();
+};
+struct Str:Node{
+  Str(char* s):Node(strdup(s),TSTR){}
+  void ex();
+};
+struct Chr:Node{
+  Chr(char c):Node((void*)NULL,TCHR),d(c){}
+  char d;
   void ex();
 };
 struct Identifier:Node{
@@ -113,6 +130,10 @@ struct Lhs:Node{
   void ex();
 };
 struct ArrayDecl:Node{
+  using Node::Node;
+  void ex();
+};
+struct Decl:Node{
   using Node::Node;
   void ex();
 };
@@ -204,4 +225,10 @@ struct Or:Node{
   using Node::Node;
   void ex();
 };
+struct Type:Node{
+  Type(_Typename t):d(t){}
+  void ex();
+  _Typename d;
+};
+void pop_stack(int n);
 #endif
