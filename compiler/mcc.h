@@ -39,20 +39,23 @@ struct func{
   char* name;
   char* line;
   long param_num;
-  func() {}
-  func(char* n, char* l, long p){
+  _Typename ret;
+  vector<_Typename> params;
+  func():ret(TWRONG) {}
+  func(char* n, char* l, long p,_Typename t){
     name = strdup(n);
     line = strdup(l);
     param_num = p;
+    ret = t;
   }
 };
 struct Node{  
   void* data;
   _Typename ret;
   vector<Node*> op;
-  Node(){}
-  Node(initializer_list<Node*> l):op(l){}
-  Node(void* d):data(d){}
+  Node():ret(TWRONG){}
+  Node(initializer_list<Node*> l):op(l),ret(TWRONG){}
+  Node(void* d):data(d),ret(TWRONG){}
   Node(void* d,_Typename t):data(d),ret(t){}
   virtual void ex();
   static long lbs,lbe,lbl;
@@ -63,8 +66,7 @@ struct Node{
   long frame_size();
   long loc(char*,vector<tuple<string,_Typename,long>>&);
   void insert_to_tb(char*,_Typename,long,vector<tuple<string,_Typename,long>>&);
-  func func_loc(char*);
-  void insert_to_frtb(char*,char*,long,vector<func>&);
+  void insert_to_frtb(char*,char*,long,_Typename,vector<func>&);
 };
 void _ex(Node*);
 struct Constant:Node{

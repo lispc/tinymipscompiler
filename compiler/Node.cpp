@@ -58,16 +58,9 @@ void Node::insert_to_tb(char* name,_Typename type,long size,vector<tuple<string,
     tb.push_back(make_tuple(name,type,size)); 
 }
 
-func Node::func_loc(char* s)
+void Node::insert_to_frtb(char* name,char* line,long param_num,_Typename t,vector<func> &tb)
 {
-  auto equaler = [=](const func& f){return !strcmp(f.name,s);};
-  auto entry = find_if(begin(functb),end(functb),equaler);
-  return *entry;
-}
-
-void Node::insert_to_frtb(char* name,char* line,long param_num,vector<func> &tb)
-{
-    tb.push_back(func(name,line,param_num));
+    tb.push_back(func(name,line,param_num,t));
 }
 
 void _ex(Node *p) {
@@ -190,6 +183,7 @@ void Print::ex(){
 void Index::ex(){
     _ex(op[1]);
     lctn *l = location((char*)op[0]->data);
+    ret = l->vtype;
     printf("\tpush\t%d\n",l->num);
     printf("\tadd\n");
     printf("\tpop\tin\n");
@@ -233,12 +227,16 @@ void Decl::ex(){
     printf("\tpush\t0\n");
 }
 void Param::ex(){
-  if(op[0]!=NULL)
+  if(op[0]!=NULL){
     insert_to_tb((char*)op[1]->data,((Type*)op[0])->d,1,tb_list.back().tb);
+	functb.back().params.push_back(((Type*)op[0])->d);
+  }
 }
 void Params::ex(){
   op[0]->ex();
   insert_to_tb((char*)op[2]->data,((Type*)op[1])->d,1,tb_list.back().tb);
+  functb.back().params.push_back(((Type*)op[1])->d);
+
 }
 void Return::ex(){
   if(op[0] != NULL)
@@ -246,6 +244,7 @@ void Return::ex(){
   printf("\tret\n");
 }
 void FuncDecl::ex(){
+  functb.push_back(func());
   long s = stack_size();
   tb_list.push_back(symtb(0,"fp"));
   long templbl = lbl++;
@@ -254,30 +253,40 @@ void FuncDecl::ex(){
   printf("L%03d:\n",templbl2);  
   char *line = (char*)malloc(5*sizeof(char));
   sprintf(line,"L%03d",templbl2);
-  op[1]->ex();
+  op[2]->ex();
   insert_to_tb("caller's sp",TVOID,1,tb_list.back().tb);
   insert_to_tb("caller's fp",TVOID,1,tb_list.back().tb);
   insert_to_tb("caller's pc",TVOID,1,tb_list.back().tb);
   long ss = s-stack_size();
   long sss = stack_size()-s-3;
-  insert_to_frtb((char*)op[0]->data,line,sss,functb);
+  functb.back().name = strdup((char*)op[1]->data);
+  functb.back().line = line;
+  functb.back().param_num = sss;
+  functb.back().ret = ((Type*)op[0])->d;
   tb_list.back().start_pos = ss;
-  op[2]->ex();
+  op[3]->ex();
   printf("L%03d:\n",templbl);
   tb_list.pop_back();
 }
 void Var::ex(){
+  assert(false && "Var::ex()");
   if(op[0]!=NULL)
     op[0]->ex();
 }
 void Vars::ex(){
-  op[0]->ex();
-  op[1]->ex();
+  for(auto i = op.begin();i!=op.end();i++)
+    (*i)->ex();
 }
 void FuncCall::ex(){
   op[1]->ex();
-  func f = func_loc((char*)op[0]->data);
-  printf("\tcall %s, %d\n",f.line,f.param_num);
+  auto equaler = [=](const func& f){return !strcmp(f.name,(char*)op[0]->data);};
+  auto entry = find_if(begin(functb),end(functb),equaler);
+  assert(entry!=functb.end()&&"use undeclared function");
+  ret  = entry->ret;
+  assert(op[1]->op.size()==entry->param_num && "fucntion argument number incorrect");
+  for(int i=0;i<entry->param_num;i++)
+    assert(op[1]->op[i]->ret==entry->params[i] && "fucntion argument type incorrect");
+  printf("\tcall %s, %d\n",entry->line,entry->param_num);
 }
 void Uminus::ex(){
     _ex(op[0]);

@@ -1,5 +1,5 @@
 int z = 10000;
-def max(int x,int y)
+def int max(int x,int y)
 {
   int l = x;
   int m = y;

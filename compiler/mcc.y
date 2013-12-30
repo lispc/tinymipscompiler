@@ -29,7 +29,7 @@ function:
   ;
 
 func_declare:
-  DEF VARIABLE '(' param_list ')' '{' stmt_list '}' { $$ = new FuncDecl({$2, $4, $7}); }
+  DEF TYPE VARIABLE '(' param_list ')' '{' stmt_list '}' { $$ = new FuncDecl({$2,$3, $5, $8}); }
   ;
 
 param_list:
@@ -39,9 +39,9 @@ param_list:
   ;
 
 var_list:
-    expr  { $$ = new Var({$1});  }
-  | var_list ',' expr  { $$ = new Vars({$1,$3});  }
-  | /*NULL*/  { $$ = new Var({NULL});  }
+    expr  { $$ = new Vars({$1});  }
+  | var_list ',' expr  { $1->op.push_back($3); $$ = $1;  }
+  | /*NULL*/  { $$ = new Vars();  }
   ;
 
 stmt:
