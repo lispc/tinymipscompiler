@@ -57,7 +57,8 @@ struct Node{
   Node(initializer_list<Node*> l):op(l),ret(TWRONG){}
   Node(void* d):data(d),ret(TWRONG){}
   Node(void* d,_Typename t):data(d),ret(t){}
-  virtual void ex();
+  virtual void ex()=0;
+  void bin_ex();
   static long lbs,lbe,lbl;
   static vector<symtb> tb_list;
   static vector<func> functb;

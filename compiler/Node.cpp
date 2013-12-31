@@ -67,18 +67,30 @@ void _ex(Node *p) {
   if (!p) return; 
   else p->ex();
 }
-void Node::ex(){
+void Node::bin_ex(){
+  string clsname = typeid(*this).name()+1;
+  string res;
+  bool compcls = clsname.substr(0,4)=="Comp";
   _ex(op[0]);
   _ex(op[1]);
-  assert(op[0]);
-  assert(op[1]);
-  if(idebug)printf("//binary oprands on stack\n");
   auto t1 = op[0]->ret;
   auto t2 = op[1]->ret;
-  if(idebug)printf("//t1:%d t2:%d\n",t1,t2);
-  assert(t1==t2 && "binary operator with different types");
+  if(compcls){
+   assert(t1==t2 && "comp operator with different types");
+   res = t1==TSTR?("s"+clsname):clsname;
+  }else if(clsname=="Add"){
+    if(t1==t2)//so 'a'+'\n'=='k', not a very good design.
+      res = t1==TSTR?"sAdd":"Add";
+    else{
+      assert(t1==TCHR&&t2==TINT&&"add with diff types");
+      res = "Add";//'a'+2=='c'
+    }
+  }else{
+    assert(t1==t2&&t1==TINT&&"op only valid to int");
+    res = clsname;
+  }
   ret = t1;
-  printf("\t%s\n",typeid(*this).name()+1);
+  printf("\t%s\n",res.c_str());
 }
 void Constant::ex(){
   printf("\tpush\t%ld\n",d);
@@ -160,7 +172,7 @@ void Read::ex(){
         default:
           cerr<<"invalid type"<<endl;
           exit(-1);
-	  }
+      }
       printf("\tpop\t%s[%d]\n",l->type,l->num);
 }
 void Print::ex(){
@@ -215,13 +227,13 @@ void ArrayDecl::ex(){
     assert(loc(name,tb_list.back().tb)==-1 && "The variable has been declared already in the same scope!");
     auto size = (long)op[2]->data;
     insert_to_tb(name,type,size,tb_list.back().tb);
-	printf("//pushing %d 0s\n",size);
+    printf("//pushing %d 0s\n",size);
     while(size--)
       printf("\tpush\t0\n");
 }
 void Decl::ex(){
-	auto type = ((Type*)op[0])->d;
-	auto name = (char*)op[1]->data;
+    auto type = ((Type*)op[0])->d;
+    auto name = (char*)op[1]->data;
     assert(loc(name,tb_list.back().tb)==-1 && "The variable has been declared already in the same scope!");
     insert_to_tb(name,type,1,tb_list.back().tb);
     printf("\tpush\t0\n");
@@ -229,7 +241,7 @@ void Decl::ex(){
 void Param::ex(){
   if(op[0]!=NULL){
     insert_to_tb((char*)op[1]->data,((Type*)op[0])->d,1,tb_list.back().tb);
-	functb.back().params.push_back(((Type*)op[0])->d);
+    functb.back().params.push_back(((Type*)op[0])->d);
   }
 }
 void Params::ex(){
@@ -301,47 +313,47 @@ void Statements::ex(){
     op[1]->ex();
 }
 void Add::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Sub::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Mul::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Div::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Mod::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompLT::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompGT::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompNE::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompGE::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompLE::ex(){
-  Node::ex();
+  bin_ex();
 }
 void CompEQ::ex(){
-  Node::ex();
+  bin_ex();
 }
 void And::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Or::ex(){
-  Node::ex();
+  bin_ex();
 }
 void Type::ex()
 {
-  Node::ex();
+  //Node::ex();
 }
 void yyerror(char* s)
 {

@@ -47,8 +47,8 @@
   char s[500];
 }
 
-%token <i>INT <i>REG <i>LABEL PUSH POP LT GT GE LE NE EQ <s>STRING
-%token CALL RET END J0 J1 JMP ADD SUB MUL DIV MOD NEG AND OR
+%token <i>INT <i>REG <i>LABEL PUSH POP LT SLT GT SGT GE SGE LE SLE NE SNE EQ SEQ <s>STRING
+%token CALL RET END J0 J1 JMP ADD SADD SUB MUL DIV MOD NEG AND OR
 %token GETI GETS GETC PUTI PUTS PUTC PUTI_ PUTS_ PUTC_
 %nonassoc ':'
 
@@ -86,15 +86,22 @@ instruction:
 	| RET		{ in[pc++] = RET; }
 	| END		{ in[pc++] = END; }
 	| LT		{ in[pc++] = LT; }
+	| SLT		{ in[pc++] = SLT; }
 	| GT		{ in[pc++] = GT; }
+	| SGT		{ in[pc++] = SGT; }
 	| GE		{ in[pc++] = GE; }
+	| SGE		{ in[pc++] = SGE; }
 	| LE		{ in[pc++] = LE; }
+	| SLE		{ in[pc++] = SLE; }
 	| NE		{ in[pc++] = NE; }
+	| SNE		{ in[pc++] = SNE; }
 	| EQ		{ in[pc++] = EQ; }
+	| SEQ		{ in[pc++] = SEQ; }
 	| J0 LABEL	{ in[pc] = J0; op[pc++] = $2; }
 	| J1 LABEL	{ in[pc] = J1; op[pc++] = $2; }
 	| JMP LABEL	{ in[pc] = JMP; op[pc++] = $2; }
 	| ADD		{ in[pc++] = ADD; }
+    | SADD      { in[pc++] = SADD;}
 	| SUB		{ in[pc++] = SUB; }
 	| MUL		{ in[pc++] = MUL; }
 	| DIV		{ in[pc++] = DIV; }
@@ -186,15 +193,22 @@ int main(int argc, char *argv[]) {
 	i = 99999999;
 	break;
 
-#define EVAL(opr) st[SP-2] = st[SP-2] opr st[SP-1]; SP--; i++; break;
-
+#define EVAL(opr)  st[SP-2] = st[SP-2] opr st[SP-1]; SP--; i++; break;
+#define SEVAL(opr) st[SP-2] = strcmp((char*)st[SP-2],(char*)st[SP-1]) opr 0; SP--; i++; break; 
       case LT: EVAL(<)
+      case SLT: SEVAL(<)
       case GT: EVAL(>)
+      case SGT: SEVAL(>)
       case GE: EVAL(>=)
+      case SGE: SEVAL(>=)
       case LE: EVAL(<=)
+      case SLE: SEVAL(<=)
       case NE: EVAL(!=)
+      case SNE: SEVAL(!=)
       case EQ: EVAL(==)
+      case SEQ: SEVAL(==)
       case ADD: EVAL(+)
+      case SADD: {char*s2=(char*)st[SP-2];char*s1=(char*)st[SP-1];char*t=(char*)malloc(strlen(s2)+strlen(s1)+1);strcpy(t,s2);strcat(t,s1);st[SP-2]=(long)t;SP--;i++;}break;
       case SUB: EVAL(-)
       case MUL: EVAL(*)
       case DIV: EVAL(/)
