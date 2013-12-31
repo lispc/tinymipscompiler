@@ -71,8 +71,8 @@ struct Node{
 };
 void _ex(Node*);
 struct Constant:Node{
-  Constant(int i):Node((void*)i,TINT),d(i){}
-  int d;
+  Constant(long i):Node((void*)i,TINT),d(i){}
+  long d;
   void ex();
 };
 struct Str:Node{
@@ -233,5 +233,5 @@ struct Type:Node{
   void ex();
   _Typename d;
 };
-void pop_stack(int n);
+void pop_stack(long n);
 #endif

@@ -1,6 +1,5 @@
 %{
 #include "mcc.h"
-#include "Node.cpp"
 #include <cstdio>
 extern void _ex(Node *p);
 extern int yylex();
@@ -108,7 +107,7 @@ expr:
 
 int main(int argc, char **argv) {
   extern FILE* yyin;
-  int yydebug=1;
+  int yydebug=0;
   yyin = fopen(argv[1], "r");
   setbuf(stdout,NULL);
   setbuf(stderr,NULL);

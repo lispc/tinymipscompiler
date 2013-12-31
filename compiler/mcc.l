@@ -1,4 +1,3 @@
-%option debug
 %{
 #include "mcc.h"
 #include "mcc.tab.h"
