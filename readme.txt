@@ -25,3 +25,8 @@
 
    It is an application designed for sorting various types of elements (int, char, str)
    It takes option choices and input from user ane output the sorted result
+
+
+
+by Zhang Zhuo
+   Sha Di
