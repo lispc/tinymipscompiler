@@ -20,8 +20,8 @@
     c. compile and assembly .sc files and compare the output with sample output
     d. report whether or not the test cases produce the correct output
 
-3. About the large test file for testing (almost) all the features:
-   execute test.sh in directory and it will run sorting (which is the test file) automatically
+3. About the large test (>200 lines) file for testing (almost) all the features:
+   execute test.sh in directory "final_test" and it will run sorting (which is the test file) automatically
 
    It is an application designed for sorting various types of elements (int, char, str)
    It takes option choices and input from user ane output the sorted result
