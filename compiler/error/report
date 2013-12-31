@@ -1,0 +1,14 @@
+[32mSucceed: array[0m
+[32mSucceed: break[0m
+[32mSucceed: continue[0m
+[32mSucceed: func_type[0m
+[32mSucceed: global_while[0m
+[32mSucceed: nested_for_loop[0m
+[32mSucceed: nested_while_loop[0m
+[32mSucceed: procedure_call_recursion[0m
+[32mSucceed: procedure_call_simple[0m
+[32mSucceed: simple_string[0m
+[32mSucceed: single_expr[0m
+[32mSucceed: string_in[0m
+[32mSucceed: string_op[0m
+[32mSucceed: xmas[0m

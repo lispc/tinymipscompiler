@@ -9,13 +9,19 @@ for FILE in ${FILES[@]}
 do
   cp $FILE.sc ../compiler/error
   cp $FILE.sample_out ../compiler/error
+  if [ -f $FILE.in ] ; then cp $FILE.in ../compiler/error ; fi
 done
 cd ../compiler/error
 touch report
 for FILE in ${FILES[@]}
 do
   ./mcc $FILE.sc > $FILE.as
-  ./nas $FILE.as > $FILE.output
+  if [ -f $FILE.in ]
+    then
+      ./nas $FILE.as > $FILE.output < $FILE.in
+    else
+      ./nas $FILE.as > $FILE.output
+  fi
   if diff $FILE.output $FILE.sample_out > $FILE.cmp
   then
     echo -e "\033[32mSucceed: $FILE\033[0m" >> report
